@@ -100,7 +100,7 @@ function App() {
     <Layout style={{ minHeight: '100vh' }}>
       <Header style={{ display: 'flex', alignItems: 'center' }}>
         <Title level={3} style={{ color: '#fff', margin: 0 }}>
-          Apartment Inventory
+          Apartment Inventory Test
         </Title>
       </Header>
       <Content style={{ padding: '24px', maxWidth: 800, margin: '0 auto', width: '100%' }}>
