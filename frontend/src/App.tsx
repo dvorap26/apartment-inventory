@@ -13,7 +13,8 @@ import {
 } from 'antd';
 import { UploadOutlined, DeleteOutlined } from '@ant-design/icons';
 import type { UploadFile } from 'antd/es/upload/interface';
-import { fetchItems, uploadItem, deleteItem, InventoryItem } from './services/api';
+import type { InventoryItem } from './services/api';
+import { fetchItems, uploadItem, deleteItem } from './services/api';
 import 'antd/dist/reset.css';
 import './App.css';
 
