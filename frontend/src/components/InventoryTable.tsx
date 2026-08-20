@@ -1,8 +1,6 @@
-import { Table, Button, Space, Collapse, Empty, message, Alert } from 'antd';
+import { Table, Button, Space, Collapse, Empty, Alert } from 'antd';
 import { PlusOutlined, EditOutlined } from '@ant-design/icons';
-import { useStorage } from '../../contexts/StorageContext';
-import { Room, InventoryItem } from '../../services/tableStorageService';
-import { useState } from 'react';
+import type { Room, InventoryItem } from '../services/tableStorageService';
 
 interface InventoryTableProps {
   rooms: Room[];
@@ -19,8 +17,6 @@ export const InventoryTable = ({
   onEditRoom,
   onSelectItem,
 }: InventoryTableProps) => {
-  const [selectedRoom, setSelectedRoom] = useState<string | null>(null);
-
   if (rooms.length === 0) {
     return (
       <Alert

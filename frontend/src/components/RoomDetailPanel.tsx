@@ -1,7 +1,7 @@
-import { Drawer, Form, Input, Button, message, Space, Popconfirm, Alert } from 'antd';
+import { Drawer, Button, message, Space, Popconfirm, Alert } from 'antd';
 import { DeleteOutlined, EditOutlined } from '@ant-design/icons';
-import { useStorage } from '../../contexts/StorageContext';
-import { Room } from '../../services/tableStorageService';
+import { useStorage } from '../contexts/StorageContext';
+import type { Room } from '../services/tableStorageService';
 import { useState } from 'react';
 
 interface RoomDetailPanelProps {
@@ -14,9 +14,7 @@ interface RoomDetailPanelProps {
 
 export const RoomDetailPanel = ({ visible, room, onClose, onEdit, onSuccess }: RoomDetailPanelProps) => {
   const { deleteRoom, inventoryItems } = useStorage();
-  const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [form] = Form.useForm();
 
   const roomItems = room ? inventoryItems.filter(item => item.roomId === room.roomId) : [];
   const canDelete = roomItems.length === 0;
@@ -40,7 +38,6 @@ export const RoomDetailPanel = ({ visible, room, onClose, onEdit, onSuccess }: R
   const handleEdit = () => {
     if (room) {
       onEdit(room);
-      setIsEditing(false);
       onClose();
     }
   };

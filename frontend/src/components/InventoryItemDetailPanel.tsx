@@ -1,8 +1,8 @@
-import { Drawer, Form, Input, Select, Button, message, Space, Popconfirm, Upload, List, message as antdMessage, Spin } from 'antd';
+import { Drawer, Form, Input, Select, Button, message, Space, Popconfirm, Upload, List } from 'antd';
 import { DeleteOutlined, EditOutlined, DownloadOutlined } from '@ant-design/icons';
-import { useStorage } from '../../contexts/StorageContext';
-import { InventoryItem, Room } from '../../services/tableStorageService';
-import { useState, useEffect } from 'react';
+import { useStorage } from '../contexts/StorageContext';
+import type { InventoryItem, Room } from '../services/tableStorageService';
+import { useState } from 'react';
 import type { RcFile } from 'antd/es/upload/interface';
 
 interface InventoryItemDetailPanelProps {
@@ -24,8 +24,6 @@ export const InventoryItemDetailPanel = ({
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(false);
   const [form] = Form.useForm();
-  const [pictureUrls, setPictureUrls] = useState<{ [key: string]: string }>({});
-  const [attachmentUrls, setAttachmentUrls] = useState<{ [key: string]: string }>({});
   const [uploadingPicture, setUploadingPicture] = useState(false);
   const [uploadingAttachment, setUploadingAttachment] = useState(false);
 

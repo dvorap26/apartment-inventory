@@ -1,4 +1,4 @@
-import { Button, message, Space, Modal, Spin } from 'antd';
+import { Button, message, Modal, Spin } from 'antd';
 import { DownloadOutlined } from '@ant-design/icons';
 import { pdf } from '@react-pdf/renderer';
 import { InventoryPDF } from './InventoryPDF';

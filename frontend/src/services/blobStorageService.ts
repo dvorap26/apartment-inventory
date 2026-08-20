@@ -1,10 +1,13 @@
-import { BlobServiceClient, BlobClient } from "@azure/storage-blob";
+import { BlobServiceClient } from "@azure/storage-blob";
 import { storageConfig } from "../config/authConfig";
 
 export class BlobStorageService {
   private blobServiceClient: BlobServiceClient | null = null;
+  private accessToken: string;
 
-  constructor(private accessToken: string) {}
+  constructor(accessToken: string) {
+    this.accessToken = accessToken;
+  }
 
   async initialize(): Promise<void> {
     try {
@@ -122,7 +125,11 @@ export class BlobStorageService {
 
 // Custom bearer token credential for storage services
 class BearerTokenAuthCredential {
-  constructor(private token: string) {}
+  private token: string;
+
+  constructor(token: string) {
+    this.token = token;
+  }
 
   async getToken(): Promise<{ token: string; expiresOnTimestamp: number }> {
     return {
