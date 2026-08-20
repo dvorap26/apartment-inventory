@@ -160,29 +160,29 @@ export class TableStorageService {
       throw new Error("Cannot delete room with inventory items");
     }
 
-    async updateRoomOrder(rooms: Room[], lastModifiedBy: string): Promise<Room[]> {
-      if (!this.roomsClient) throw new Error("Table storage not initialized");
-
-      const now = new Date().toISOString();
-      const orderedRooms = rooms.map((room, sortOrder) => ({
-        ...room,
-        sortOrder,
-        lastModifiedAt: now,
-        lastModifiedBy
-      }));
-
-      await Promise.all(
-        orderedRooms.map((room) => this.roomsClient!.upsertEntity(this.toRoomEntity(room), "Replace"))
-      );
-      return orderedRooms;
-    }
-
     try {
       await this.roomsClient.deleteEntity(roomId, roomId);
     } catch (error) {
       console.error("Failed to delete room:", error);
       throw error;
     }
+  }
+
+  async updateRoomOrder(rooms: Room[], lastModifiedBy: string): Promise<Room[]> {
+    if (!this.roomsClient) throw new Error("Table storage not initialized");
+
+    const now = new Date().toISOString();
+    const orderedRooms = rooms.map((room, sortOrder) => ({
+      ...room,
+      sortOrder,
+      lastModifiedAt: now,
+      lastModifiedBy
+    }));
+
+    await Promise.all(
+      orderedRooms.map((room) => this.roomsClient!.upsertEntity(this.toRoomEntity(room), "Replace"))
+    );
+    return orderedRooms;
   }
 
   async getInventoryItems(): Promise<InventoryItem[]> {
@@ -297,23 +297,24 @@ export class TableStorageService {
       console.error("Failed to delete inventory item:", error);
       throw error;
     }
+  }
 
-    async updateInventoryItemOrder(items: InventoryItem[], lastModifiedBy: string): Promise<InventoryItem[]> {
-      if (!this.inventoryClient) throw new Error("Table storage not initialized");
+  async updateInventoryItemOrder(items: InventoryItem[], lastModifiedBy: string): Promise<InventoryItem[]> {
+    if (!this.inventoryClient) throw new Error("Table storage not initialized");
 
-      const now = new Date().toISOString();
-      const orderedItems = items.map((item, sortOrder) => ({
-        ...item,
-        sortOrder,
-        lastModifiedAt: now,
-        lastModifiedBy
-      }));
+    const now = new Date().toISOString();
+    const orderedItems = items.map((item, sortOrder) => ({
+      ...item,
+      sortOrder,
+      lastModifiedAt: now,
+      lastModifiedBy
+    }));
 
-      await Promise.all(
-        orderedItems.map((item) => this.inventoryClient!.upsertEntity(this.toInventoryItemEntity(item), "Replace"))
-      );
-      return orderedItems;
-    }
+    await Promise.all(
+      orderedItems.map((item) => this.inventoryClient!.upsertEntity(this.toInventoryItemEntity(item), "Replace"))
+    );
+    return orderedItems;
+
   }
 
   private generateId(): string {
