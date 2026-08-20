@@ -18,19 +18,19 @@ export const ExportButton = () => {
       return;
     }
 
+    const pictureUrls: { [key: string]: string } = {};
+
     try {
       setLoading(true);
       setModalVisible(true);
 
       // Collect all picture URLs
-      const pictureUrls: { [key: string]: string } = {};
-
       // Get URLs for all pictures
       for (const item of inventoryItems) {
         for (const pictureId of item.pictureIds) {
           if (blobService && !pictureUrls[pictureId]) {
             try {
-              const url = await blobService.getPictureUrl(pictureId);
+              const url = await blobService.getPicturePreviewUrl(pictureId);
               pictureUrls[pictureId] = url;
             } catch (error) {
               console.warn(`Failed to get URL for picture ${pictureId}:`, error);
@@ -65,6 +65,7 @@ export const ExportButton = () => {
       message.error(errorMessage);
       console.error('Export error:', error);
     } finally {
+      Object.values(pictureUrls).forEach((url) => URL.revokeObjectURL(url));
       setLoading(false);
       setModalVisible(false);
     }
