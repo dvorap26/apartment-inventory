@@ -3,8 +3,7 @@ import { msalConfig } from "./authConfig";
 
 export const msalInstance = new msal.PublicClientApplication(msalConfig);
 
-// Initialize MSAL
-msalInstance.initialize();
+export const msalInitialization = msalInstance.initialize();
 
 // Scopes for Azure Storage access
 export const storageScopes = {

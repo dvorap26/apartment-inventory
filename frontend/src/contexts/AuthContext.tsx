@@ -1,12 +1,13 @@
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect, useRef } from 'react';
 import type { ReactNode } from 'react';
 import type { AccountInfo } from '@azure/msal-browser';
-import { msalInstance, storageScopes } from '../config/msalInstance';
+import { msalInitialization, msalInstance, storageScopes } from '../config/msalInstance';
 
 interface AuthContextType {
   isAuthenticated: boolean;
   account: AccountInfo | null;
   isLoading: boolean;
+  isLoggingIn: boolean;
   login: () => Promise<void>;
   logout: () => Promise<void>;
   getAccessToken: (scopes?: string[]) => Promise<string>;
@@ -19,11 +20,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [account, setAccount] = useState<AccountInfo | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [hasWritePermission, setHasWritePermission] = useState(false);
+  const loginRequestRef = useRef<Promise<void> | null>(null);
 
   useEffect(() => {
     const initAuth = async () => {
       try {
+        await msalInitialization;
         const accounts = msalInstance.getAllAccounts();
         if (accounts.length > 0) {
           setAccount(accounts[0]);
@@ -48,6 +52,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const getAccessTokenInternal = async (scopes: string[]): Promise<string> => {
     try {
+      await msalInitialization;
       const response = await msalInstance.acquireTokenSilent({
         scopes,
         account: account || undefined
@@ -59,27 +64,55 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  const login = async () => {
-    try {
-      const response = await msalInstance.loginPopup();
-      setAccount(response.account);
-      setIsAuthenticated(true);
-      
-      // Check write permission
-      try {
-        await getAccessTokenInternal(storageScopes.write);
-        setHasWritePermission(true);
-      } catch {
-        setHasWritePermission(false);
-      }
-    } catch (error) {
-      console.error('Login failed:', error);
-      throw error;
+  const login = (): Promise<void> => {
+    if (loginRequestRef.current) {
+      return loginRequestRef.current;
     }
+
+    const loginRequest = (async () => {
+      setIsLoggingIn(true);
+
+      try {
+        await msalInitialization;
+        const response = await msalInstance.loginPopup();
+        setAccount(response.account);
+        setIsAuthenticated(true);
+
+        // Check write permission
+        try {
+          await getAccessTokenInternal(storageScopes.write);
+          setHasWritePermission(true);
+        } catch {
+          setHasWritePermission(false);
+        }
+      } catch (error) {
+        console.error('Login failed:', error);
+        throw error;
+      } finally {
+        setIsLoggingIn(false);
+      }
+    })();
+
+    loginRequestRef.current = loginRequest;
+    void loginRequest.then(
+      () => {
+        if (loginRequestRef.current === loginRequest) {
+          loginRequestRef.current = null;
+        }
+      },
+      () => {
+        if (loginRequestRef.current === loginRequest) {
+          loginRequestRef.current = null;
+        }
+      }
+    );
+
+    return loginRequest;
   };
 
   const logout = async () => {
     try {
+      await msalInitialization;
       await msalInstance.logoutPopup();
       setAccount(null);
       setIsAuthenticated(false);
@@ -100,6 +133,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         isAuthenticated,
         account,
         isLoading,
+        isLoggingIn,
         login,
         logout,
         getAccessToken,

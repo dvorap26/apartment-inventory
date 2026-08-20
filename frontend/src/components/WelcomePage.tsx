@@ -6,7 +6,7 @@ import './WelcomePage.css';
 const { Content } = Layout;
 
 export const WelcomePage = () => {
-  const { isLoading, login } = useAuth();
+  const { isLoading, isLoggingIn, login } = useAuth();
 
   const handleLogin = async () => {
     try {
@@ -42,6 +42,8 @@ export const WelcomePage = () => {
               size="large"
               icon={<LoginOutlined />}
               onClick={handleLogin}
+              loading={isLoggingIn}
+              disabled={isLoggingIn}
             >
               Sign in with Microsoft
             </Button>
