@@ -1,25 +1,32 @@
-import { Drawer, Button, message, Space, Popconfirm, Alert } from 'antd';
+import { Drawer, Button, Form, Input, message, Space, Popconfirm, Alert } from 'antd';
 import { DeleteOutlined, EditOutlined } from '@ant-design/icons';
 import { useStorage } from '../contexts/StorageContext';
 import type { Room } from '../services/tableStorageService';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
 
 interface RoomDetailPanelProps {
   visible: boolean;
   room: Room | null;
   onClose: () => void;
-  onEdit: (room: Room) => void;
+  onRoomUpdated: (room: Room) => void;
   onSuccess: () => void;
 }
 
-export const RoomDetailPanel = ({ visible, room, onClose, onEdit, onSuccess }: RoomDetailPanelProps) => {
-  const { deleteRoom, inventoryItems } = useStorage();
+export const RoomDetailPanel = ({ visible, room, onClose, onRoomUpdated, onSuccess }: RoomDetailPanelProps) => {
+  const { deleteRoom, inventoryItems, updateRoom } = useStorage();
   const [loading, setLoading] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [form] = Form.useForm();
   const { language, t } = useLanguage();
 
   const roomItems = room ? inventoryItems.filter(item => item.roomId === room.roomId) : [];
   const canDelete = roomItems.length === 0;
+
+  useEffect(() => {
+    form.setFieldsValue({ roomName: room?.roomName });
+    setIsEditing(false);
+  }, [form, room]);
 
   const handleDelete = async () => {
     if (!room) return;
@@ -37,10 +44,22 @@ export const RoomDetailPanel = ({ visible, room, onClose, onEdit, onSuccess }: R
     }
   };
 
-  const handleEdit = () => {
-    if (room) {
-      onEdit(room);
-      onClose();
+  const handleSave = async () => {
+    if (!room) return;
+
+    const { roomName } = await form.validateFields();
+    try {
+      setLoading(true);
+      const updatedRoom = await updateRoom(room.roomId, roomName);
+      onRoomUpdated(updatedRoom);
+      message.success(t('roomUpdated'));
+      setIsEditing(false);
+      onSuccess();
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : t('error');
+      message.error(errorMessage);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -68,10 +87,26 @@ export const RoomDetailPanel = ({ visible, room, onClose, onEdit, onSuccess }: R
             <p>{room.roomId}</p>
           </div>
 
-          <div>
-            <label style={{ fontWeight: 'bold' }}>{t('roomName')}:</label>
-            <p>{room.roomName}</p>
-          </div>
+          {isEditing ? (
+            <Form form={form} layout="vertical">
+              <Form.Item
+                name="roomName"
+                label={t('roomName')}
+                rules={[
+                  { required: true, message: t('roomNameRequired') },
+                  { min: 1, message: t('roomNameEmpty') },
+                  { max: 100, message: t('roomNameLength') },
+                ]}
+              >
+                <Input autoFocus />
+              </Form.Item>
+            </Form>
+          ) : (
+            <div>
+              <label style={{ fontWeight: 'bold' }}>{t('roomName')}:</label>
+              <p>{room.roomName}</p>
+            </div>
+          )}
 
           <div>
             <label style={{ fontWeight: 'bold' }}>{t('itemsInRoom')}</label>
@@ -90,14 +125,24 @@ export const RoomDetailPanel = ({ visible, room, onClose, onEdit, onSuccess }: R
           </div>
 
           <Space>
-            <Button
-              type="primary"
-              icon={<EditOutlined />}
-              onClick={handleEdit}
-            >
-              {t('edit')}
-            </Button>
-            <Popconfirm
+            {!isEditing && (
+              <Button
+                type="primary"
+                icon={<EditOutlined />}
+                onClick={() => setIsEditing(true)}
+              >
+                {t('edit')}
+              </Button>
+            )}
+            {isEditing && (
+              <>
+                <Button type="primary" loading={loading} onClick={handleSave}>
+                  {t('save')}
+                </Button>
+                <Button onClick={() => setIsEditing(false)}>{t('cancel')}</Button>
+              </>
+            )}
+            {!isEditing && <Popconfirm
               title={t('deleteRoom')}
               description={canDelete ? t('confirmDeleteRoom') : t('roomHasItems')}
               onConfirm={handleDelete}
@@ -113,7 +158,7 @@ export const RoomDetailPanel = ({ visible, room, onClose, onEdit, onSuccess }: R
               >
                 {t('delete')}
               </Button>
-            </Popconfirm>
+            </Popconfirm>}
           </Space>
         </Space>
       )}
