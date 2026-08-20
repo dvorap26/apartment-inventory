@@ -1,8 +1,8 @@
-import { Drawer, Form, Input, Select, Button, message, Space, Popconfirm, Upload, List } from 'antd';
-import { DeleteOutlined, EditOutlined, DownloadOutlined } from '@ant-design/icons';
+import { Drawer, Form, Input, Select, Button, Image, message, Space, Popconfirm, Upload, List } from 'antd';
+import { DeleteOutlined, EditOutlined, DownloadOutlined, LeftOutlined, RightOutlined } from '@ant-design/icons';
 import { useStorage } from '../contexts/StorageContext';
 import type { InventoryItem, Room } from '../services/tableStorageService';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { RcFile } from 'antd/es/upload/interface';
 import { useLanguage } from '../contexts/LanguageContext';
 
@@ -27,7 +27,32 @@ export const InventoryItemDetailPanel = ({
   const [form] = Form.useForm();
   const [uploadingPicture, setUploadingPicture] = useState(false);
   const [uploadingAttachment, setUploadingAttachment] = useState(false);
-  const { t } = useLanguage();
+  const [pictureIndex, setPictureIndex] = useState(0);
+  const [pictureUrl, setPictureUrl] = useState<string | null>(null);
+  const { language, t } = useLanguage();
+
+  useEffect(() => {
+    setPictureIndex(0);
+  }, [item?.itemId]);
+
+  useEffect(() => {
+    const pictureId = item?.pictureIds[pictureIndex];
+    if (!pictureId || !blobService) {
+      setPictureUrl(null);
+      return;
+    }
+
+    let active = true;
+    void blobService.getPictureUrl(pictureId).then((url) => {
+      if (active) {
+        setPictureUrl(url);
+      }
+    });
+
+    return () => {
+      active = false;
+    };
+  }, [blobService, item?.pictureIds, pictureIndex]);
 
   const handleEdit = async () => {
     if (!item) return;
@@ -250,31 +275,41 @@ export const InventoryItemDetailPanel = ({
                   {t('pictures')} ({item.pictureIds.length})
                 </label>
                 {item.pictureIds.length > 0 ? (
-                  <List
-                    dataSource={item.pictureIds}
-                    renderItem={(pictureId) => (
-                      <List.Item
-                        key={pictureId}
-                        actions={[
-                          <Button
-                            type="text"
-                            icon={<DownloadOutlined />}
-                            size="small"
-                            onClick={() => handleDownloadPicture(pictureId)}
-                          />,
-                          <Button
-                            type="text"
-                            danger
-                            icon={<DeleteOutlined />}
-                            size="small"
-                            onClick={() => handleDeletePicture(pictureId)}
-                          />,
-                        ]}
-                      >
-                        {getPictureFileName(pictureId)}
-                      </List.Item>
+                  <div style={{ textAlign: 'center' }}>
+                    {pictureUrl && (
+                      <Image
+                        alt={getPictureFileName(item.pictureIds[pictureIndex])}
+                        src={pictureUrl}
+                        style={{ maxHeight: 280, maxWidth: '100%', objectFit: 'contain' }}
+                      />
                     )}
-                  />
+                    <Space style={{ display: 'flex', justifyContent: 'center', marginTop: 8 }}>
+                      <Button
+                        aria-label={t('previousPicture')}
+                        disabled={pictureIndex === 0}
+                        icon={<LeftOutlined />}
+                        onClick={() => setPictureIndex((index) => index - 1)}
+                      />
+                      <span>{pictureIndex + 1} / {item.pictureIds.length}</span>
+                      <Button
+                        aria-label={t('nextPicture')}
+                        disabled={pictureIndex === item.pictureIds.length - 1}
+                        icon={<RightOutlined />}
+                        onClick={() => setPictureIndex((index) => index + 1)}
+                      />
+                      <Button
+                        type="text"
+                        icon={<DownloadOutlined />}
+                        onClick={() => handleDownloadPicture(item.pictureIds[pictureIndex])}
+                      />
+                      <Button
+                        type="text"
+                        danger
+                        icon={<DeleteOutlined />}
+                        onClick={() => handleDeletePicture(item.pictureIds[pictureIndex])}
+                      />
+                    </Space>
+                  </div>
                 ) : (
                   <p style={{ color: '#999' }}>{t('noPictures')}</p>
                 )}
@@ -332,12 +367,12 @@ export const InventoryItemDetailPanel = ({
 
               <div style={{ marginBottom: '24px' }}>
                 <label style={{ fontWeight: 'bold' }}>{t('created')}</label>
-                <p>{new Date(item.createdAt).toLocaleString()}</p>
+                <p>{new Date(item.createdAt).toLocaleString(language === 'cs' ? 'cs-CZ' : 'en-US')}</p>
               </div>
 
               <div style={{ marginBottom: '24px' }}>
                 <label style={{ fontWeight: 'bold' }}>{t('lastModified')}</label>
-                <p>{new Date(item.lastModifiedAt).toLocaleString()}</p>
+                <p>{new Date(item.lastModifiedAt).toLocaleString(language === 'cs' ? 'cs-CZ' : 'en-US')}</p>
                 <p style={{ fontSize: '12px', color: '#666' }}>{t('by')} {item.lastModifiedBy}</p>
               </div>
             </>

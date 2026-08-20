@@ -145,7 +145,7 @@ export const InventoryPDF = ({ rooms, inventoryItems, pictureUrls = {}, language
         })}
 
         <Text style={styles.timestamp}>
-          {labels.generated} {new Date().toLocaleString(language)}
+          {labels.generated} {new Date().toLocaleString(language === 'cs' ? 'cs-CZ' : 'en-US')}
         </Text>
       </Page>
     </Document>

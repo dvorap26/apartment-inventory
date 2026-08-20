@@ -110,14 +110,7 @@ export const InventoryTable = ({
 
   return (
     <div>
-      <div style={{ marginBottom: '24px' }}>
-        <Space>
-          <Button type="primary" icon={<PlusOutlined />} size="large">
-            {t('addRoom')}
-          </Button>
-        </Space>
-      </div>
-      <Collapse items={items} />
+      <Collapse defaultActiveKey={rooms.map((room) => room.roomId)} items={items} />
     </div>
   );
 };

@@ -78,6 +78,8 @@ const translations = {
     roomHasItems: 'Room has inventory items',
     roomHasItemsDescription: 'This room contains {count} item(s) and cannot be deleted until they are moved or removed.',
     pictures: 'Pictures',
+    previousPicture: 'Previous picture',
+    nextPicture: 'Next picture',
     attachments: 'Attachments',
     noPictures: 'No pictures yet',
     noAttachments: 'No attachments yet',
@@ -163,6 +165,8 @@ const translations = {
     roomHasItems: 'Mistnost obsahuje polozky inventare',
     roomHasItemsDescription: 'Tato mistnost obsahuje {count} polozek a nelze ji smazat, dokud nebudou presunuty nebo odstraneny.',
     pictures: 'Fotografie',
+    previousPicture: 'Předchozí fotografie',
+    nextPicture: 'Další fotografie',
     attachments: 'Prilohy',
     noPictures: 'Zatim nejsou zadne fotografie',
     noAttachments: 'Zatim nejsou zadne prilohy',
@@ -188,7 +192,7 @@ const LanguageContext = createContext<LanguageContextValue | undefined>(undefine
 
 export const LanguageProvider = ({ children }: { children: ReactNode }) => {
   const [language, setLanguage] = useState<Language>(() =>
-    localStorage.getItem('language') === 'cs' ? 'cs' : 'en'
+    localStorage.getItem('language') === 'en' ? 'en' : 'cs'
   );
 
   useEffect(() => {

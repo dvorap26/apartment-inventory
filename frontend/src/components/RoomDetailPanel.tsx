@@ -80,12 +80,12 @@ export const RoomDetailPanel = ({ visible, room, onClose, onEdit, onSuccess }: R
 
           <div>
             <label style={{ fontWeight: 'bold' }}>{t('created')}</label>
-            <p>{new Date(room.createdAt).toLocaleString(language)}</p>
+            <p>{new Date(room.createdAt).toLocaleString(language === 'cs' ? 'cs-CZ' : 'en-US')}</p>
           </div>
 
           <div>
             <label style={{ fontWeight: 'bold' }}>{t('lastModified')}</label>
-            <p>{new Date(room.lastModifiedAt).toLocaleString(language)}</p>
+            <p>{new Date(room.lastModifiedAt).toLocaleString(language === 'cs' ? 'cs-CZ' : 'en-US')}</p>
             <p style={{ fontSize: '12px', color: '#666' }}>{t('by')} {room.lastModifiedBy}</p>
           </div>
 
