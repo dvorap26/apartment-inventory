@@ -2,6 +2,7 @@ import { Modal, Form, Input, Select, Button, message } from 'antd';
 import { useStorage } from '../contexts/StorageContext';
 import type { Room } from '../services/tableStorageService';
 import { useState } from 'react';
+import { useLanguage } from '../contexts/LanguageContext';
 
 interface InventoryItemModalProps {
   visible: boolean;
@@ -21,6 +22,7 @@ export const InventoryItemModal = ({
   const { createInventoryItem } = useStorage();
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
+  const { t } = useLanguage();
 
   const handleSubmit = async (values: {
     itemName: string;
@@ -34,7 +36,7 @@ export const InventoryItemModal = ({
         values.description,
         values.roomId
       );
-      message.success('Item created successfully');
+      message.success(t('itemCreated'));
       form.resetFields();
       onSuccess();
       onClose();
@@ -53,15 +55,15 @@ export const InventoryItemModal = ({
 
   return (
     <Modal
-      title="Create New Inventory Item"
+      title={t('createItem')}
       open={visible}
       onCancel={handleCancel}
       footer={[
         <Button key="cancel" onClick={handleCancel}>
-          Cancel
+          {t('cancel')}
         </Button>,
         <Button key="submit" type="primary" loading={loading} onClick={() => form.submit()}>
-          Create
+          {t('create')}
         </Button>,
       ]}
     >
@@ -75,36 +77,32 @@ export const InventoryItemModal = ({
       >
         <Form.Item
           name="itemName"
-          label="Item Name"
+          label={t('itemName')}
           rules={[
-            { required: true, message: 'Item name is required' },
-            { min: 1, message: 'Item name cannot be empty' },
-            { max: 100, message: 'Item name must be less than 100 characters' },
+            { required: true, message: t('itemNameRequired') },
+            { min: 1, message: t('itemNameEmpty') },
+            { max: 100, message: t('itemNameLength') },
           ]}
         >
-          <Input placeholder="Enter item name (e.g., Refrigerator)" />
+          <Input placeholder={t('itemNamePlaceholder')} />
         </Form.Item>
 
         <Form.Item
           name="description"
-          label="Description"
-          rules={[
-            { required: true, message: 'Description is required' },
-            { min: 1, message: 'Description cannot be empty' },
-          ]}
+          label={t('description')}
         >
           <Input.TextArea
-            placeholder="Enter item description"
+            placeholder={t('descriptionPlaceholder')}
             rows={3}
           />
         </Form.Item>
 
         <Form.Item
           name="roomId"
-          label="Room"
-          rules={[{ required: true, message: 'Room is required' }]}
+          label={t('room')}
+          rules={[{ required: true, message: t('roomRequired') }]}
         >
-          <Select placeholder="Select a room">
+          <Select placeholder={t('selectRoom')}>
             {rooms.map(room => (
               <Select.Option key={room.roomId} value={room.roomId}>
                 {room.roomName}

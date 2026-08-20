@@ -4,15 +4,17 @@ import { pdf } from '@react-pdf/renderer';
 import { InventoryPDF } from './InventoryPDF';
 import { useStorage } from '../contexts/StorageContext';
 import { useState } from 'react';
+import { useLanguage } from '../contexts/LanguageContext';
 
 export const ExportButton = () => {
   const { rooms, inventoryItems, blobService } = useStorage();
   const [loading, setLoading] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
+  const { language, t } = useLanguage();
 
   const handleExportPDF = async () => {
     if (rooms.length === 0) {
-      message.warning('No rooms to export');
+      message.warning(t('noRoomsToExport'));
       return;
     }
 
@@ -42,6 +44,7 @@ export const ExportButton = () => {
         rooms={rooms}
         inventoryItems={inventoryItems}
         pictureUrls={pictureUrls}
+        language={language}
       />;
 
       const blob = await pdf(doc).toBlob();
@@ -56,7 +59,7 @@ export const ExportButton = () => {
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
 
-      message.success('PDF exported successfully');
+      message.success(t('pdfExported'));
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to export PDF';
       message.error(errorMessage);
@@ -75,18 +78,18 @@ export const ExportButton = () => {
         loading={loading}
         disabled={rooms.length === 0}
       >
-        Export to PDF
+        {t('exportPdf')}
       </Button>
 
       <Modal
-        title="Generating PDF"
+        title={t('generatingPdf')}
         open={modalVisible}
         footer={null}
         closable={false}
         centered
       >
         <div style={{ textAlign: 'center', padding: '24px' }}>
-          <Spin size="large" tip="Preparing your inventory export..." />
+          <Spin size="large" tip={t('preparingExport')} />
         </div>
       </Modal>
     </>

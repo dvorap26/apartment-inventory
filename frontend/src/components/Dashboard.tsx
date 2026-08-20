@@ -9,9 +9,11 @@ import { RoomDetailPanel } from './RoomDetailPanel';
 import { InventoryItemModal } from './InventoryItemModal';
 import { InventoryItemDetailPanel } from './InventoryItemDetailPanel';
 import { ExportButton } from './ExportButton';
+import { useLanguage } from '../contexts/LanguageContext';
 
 export const Dashboard = () => {
   const { rooms, inventoryItems, isLoading, error, loadRooms, loadInventoryItems } = useStorage();
+  const { t } = useLanguage();
   const [roomModalVisible, setRoomModalVisible] = useState(false);
   const [itemModalVisible, setItemModalVisible] = useState(false);
   const [roomDetailVisible, setRoomDetailVisible] = useState(false);
@@ -25,9 +27,9 @@ export const Dashboard = () => {
     try {
       await loadRooms();
       await loadInventoryItems();
-      message.success('Data refreshed successfully');
+      message.success(t('refreshed'));
     } catch (err) {
-      message.error('Failed to refresh data');
+      message.error(t('refreshFailed'));
     }
   };
 
@@ -84,7 +86,7 @@ export const Dashboard = () => {
       <Layout style={{ minHeight: '100%' }}>
         <Layout.Content style={{ padding: '24px' }}>
           <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '400px' }}>
-            <Spin size="large" tip="Loading inventory..." />
+            <Spin size="large" tip={t('loadingInventory')} />
           </div>
         </Layout.Content>
       </Layout>
@@ -96,7 +98,7 @@ export const Dashboard = () => {
       <Layout.Content style={{ padding: '24px' }}>
         {error && (
           <Alert
-            message="Error"
+            message={t('error')}
             description={error}
             type="error"
             showIcon
@@ -113,10 +115,10 @@ export const Dashboard = () => {
               icon={<PlusOutlined />}
               onClick={handleCreateRoom}
             >
-              Add Room
+              {t('addRoom')}
             </Button>
             <Button onClick={handleRefresh}>
-              Refresh
+              {t('refresh')}
             </Button>
             <ExportButton />
           </Space>
@@ -124,8 +126,8 @@ export const Dashboard = () => {
 
         {rooms.length === 0 ? (
           <Alert
-            message="No rooms created yet"
-            description="Click 'Add Room' above to create your first room before adding inventory items."
+            message={t('noRooms')}
+            description={t('noRoomsDescription')}
             type="info"
             showIcon
             style={{ marginBottom: '24px' }}

@@ -4,12 +4,14 @@ import { StorageProvider } from './contexts/StorageContext';
 import { ProtectedLayout } from './components/ProtectedLayout';
 import { Dashboard } from './components/Dashboard';
 import { useAuth } from './contexts/AuthContext';
+import { LanguageProvider, useLanguage } from './contexts/LanguageContext';
 import { Spin } from 'antd';
 import 'antd/dist/reset.css';
 import './App.css';
 
 function AppContent() {
   const { isLoading } = useAuth();
+  const { t } = useLanguage();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -25,7 +27,7 @@ function AppContent() {
   }
 
   return (
-    <ProtectedLayout title="Apartment Inventory">
+    <ProtectedLayout title={t('appTitle')}>
       <Dashboard />
     </ProtectedLayout>
   );
@@ -33,11 +35,13 @@ function AppContent() {
 
 function App() {
   return (
-    <AuthProvider>
-      <StorageProvider>
-        <AppContent />
-      </StorageProvider>
-    </AuthProvider>
+    <LanguageProvider>
+      <AuthProvider>
+        <StorageProvider>
+          <AppContent />
+        </StorageProvider>
+      </AuthProvider>
+    </LanguageProvider>
   );
 }
 

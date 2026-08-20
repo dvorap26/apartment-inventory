@@ -3,6 +3,7 @@ import { DeleteOutlined, EditOutlined } from '@ant-design/icons';
 import { useStorage } from '../contexts/StorageContext';
 import type { Room } from '../services/tableStorageService';
 import { useState } from 'react';
+import { useLanguage } from '../contexts/LanguageContext';
 
 interface RoomDetailPanelProps {
   visible: boolean;
@@ -15,6 +16,7 @@ interface RoomDetailPanelProps {
 export const RoomDetailPanel = ({ visible, room, onClose, onEdit, onSuccess }: RoomDetailPanelProps) => {
   const { deleteRoom, inventoryItems } = useStorage();
   const [loading, setLoading] = useState(false);
+  const { language, t } = useLanguage();
 
   const roomItems = room ? inventoryItems.filter(item => item.roomId === room.roomId) : [];
   const canDelete = roomItems.length === 0;
@@ -24,7 +26,7 @@ export const RoomDetailPanel = ({ visible, room, onClose, onEdit, onSuccess }: R
     try {
       setLoading(true);
       await deleteRoom(room.roomId);
-      message.success('Room deleted successfully');
+      message.success(t('roomDeleted'));
       onSuccess();
       onClose();
     } catch (error) {
@@ -44,7 +46,7 @@ export const RoomDetailPanel = ({ visible, room, onClose, onEdit, onSuccess }: R
 
   return (
     <Drawer
-      title="Room Details"
+      title={t('roomDetails')}
       placement="right"
       onClose={onClose}
       open={visible}
@@ -54,37 +56,37 @@ export const RoomDetailPanel = ({ visible, room, onClose, onEdit, onSuccess }: R
         <Space direction="vertical" style={{ width: '100%' }} size="large">
           {!canDelete && (
             <Alert
-              message="Room has inventory items"
-              description={`This room contains ${roomItems.length} item(s) and cannot be deleted until they are moved or removed.`}
+              message={t('roomHasItems')}
+              description={t('roomHasItemsDescription', { count: roomItems.length })}
               type="info"
               showIcon
             />
           )}
 
           <div>
-            <label style={{ fontWeight: 'bold' }}>Room ID:</label>
+            <label style={{ fontWeight: 'bold' }}>{t('roomId')}</label>
             <p>{room.roomId}</p>
           </div>
 
           <div>
-            <label style={{ fontWeight: 'bold' }}>Room Name:</label>
+            <label style={{ fontWeight: 'bold' }}>{t('roomName')}:</label>
             <p>{room.roomName}</p>
           </div>
 
           <div>
-            <label style={{ fontWeight: 'bold' }}>Items in this room:</label>
+            <label style={{ fontWeight: 'bold' }}>{t('itemsInRoom')}</label>
             <p>{roomItems.length}</p>
           </div>
 
           <div>
-            <label style={{ fontWeight: 'bold' }}>Created:</label>
-            <p>{new Date(room.createdAt).toLocaleString()}</p>
+            <label style={{ fontWeight: 'bold' }}>{t('created')}</label>
+            <p>{new Date(room.createdAt).toLocaleString(language)}</p>
           </div>
 
           <div>
-            <label style={{ fontWeight: 'bold' }}>Last Modified:</label>
-            <p>{new Date(room.lastModifiedAt).toLocaleString()}</p>
-            <p style={{ fontSize: '12px', color: '#666' }}>by {room.lastModifiedBy}</p>
+            <label style={{ fontWeight: 'bold' }}>{t('lastModified')}</label>
+            <p>{new Date(room.lastModifiedAt).toLocaleString(language)}</p>
+            <p style={{ fontSize: '12px', color: '#666' }}>{t('by')} {room.lastModifiedBy}</p>
           </div>
 
           <Space>
@@ -93,14 +95,14 @@ export const RoomDetailPanel = ({ visible, room, onClose, onEdit, onSuccess }: R
               icon={<EditOutlined />}
               onClick={handleEdit}
             >
-              Edit
+              {t('edit')}
             </Button>
             <Popconfirm
-              title="Delete Room?"
-              description={canDelete ? 'Are you sure you want to delete this room?' : 'This room contains items and cannot be deleted'}
+              title={t('deleteRoom')}
+              description={canDelete ? t('confirmDeleteRoom') : t('roomHasItems')}
               onConfirm={handleDelete}
-              okText="Yes"
-              cancelText="No"
+              okText={t('yes')}
+              cancelText={t('no')}
               disabled={!canDelete}
             >
               <Button
@@ -109,7 +111,7 @@ export const RoomDetailPanel = ({ visible, room, onClose, onEdit, onSuccess }: R
                 disabled={!canDelete}
                 loading={loading}
               >
-                Delete
+                {t('delete')}
               </Button>
             </Popconfirm>
           </Space>

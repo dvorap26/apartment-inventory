@@ -1,6 +1,7 @@
 import { Table, Button, Space, Collapse, Empty, Alert } from 'antd';
 import { PlusOutlined, EditOutlined } from '@ant-design/icons';
 import type { Room, InventoryItem } from '../services/tableStorageService';
+import { useLanguage } from '../contexts/LanguageContext';
 
 interface InventoryTableProps {
   rooms: Room[];
@@ -17,11 +18,12 @@ export const InventoryTable = ({
   onEditRoom,
   onSelectItem,
 }: InventoryTableProps) => {
+  const { t } = useLanguage();
   if (rooms.length === 0) {
     return (
       <Alert
-        message="No rooms available"
-        description="Please create a room first before adding inventory items."
+        message={t('noRoomsAvailable')}
+        description={t('noRoomsAvailableDescription')}
         type="warning"
         showIcon
         style={{ marginBottom: '24px' }}
@@ -34,20 +36,20 @@ export const InventoryTable = ({
 
     const columns = [
       {
-        title: 'Item Name',
+        title: t('itemName'),
         dataIndex: 'itemName',
         key: 'itemName',
         width: '40%',
       },
       {
-        title: 'Description',
+        title: t('description'),
         dataIndex: 'description',
         key: 'description',
         width: '40%',
         ellipsis: true,
       },
       {
-        title: 'Actions',
+        title: t('actions'),
         key: 'actions',
         width: '20%',
         render: (_: unknown, record: InventoryItem) => (
@@ -57,7 +59,7 @@ export const InventoryTable = ({
               size="small"
               onClick={() => onSelectItem(record)}
             >
-              View
+              {t('view')}
             </Button>
           </Space>
         ),
@@ -69,7 +71,7 @@ export const InventoryTable = ({
       label: (
         <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
           <span>
-            {room.roomName} ({roomItems.length} items)
+            {room.roomName} ({roomItems.length} {t('items')})
           </span>
           <Space onClick={(e) => e.stopPropagation()}>
             <Button
@@ -84,7 +86,7 @@ export const InventoryTable = ({
               icon={<PlusOutlined />}
               onClick={() => onAddItem(room.roomId)}
             >
-              Add Item
+              {t('addItem')}
             </Button>
           </Space>
         </div>
@@ -101,7 +103,7 @@ export const InventoryTable = ({
           })}
         />
       ) : (
-        <Empty description="No items in this room" style={{ padding: '24px 0' }} />
+        <Empty description={t('noItems')} style={{ padding: '24px 0' }} />
       ),
     };
   });
@@ -111,7 +113,7 @@ export const InventoryTable = ({
       <div style={{ marginBottom: '24px' }}>
         <Space>
           <Button type="primary" icon={<PlusOutlined />} size="large">
-            Add Room
+            {t('addRoom')}
           </Button>
         </Space>
       </div>

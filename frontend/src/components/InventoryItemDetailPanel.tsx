@@ -4,6 +4,7 @@ import { useStorage } from '../contexts/StorageContext';
 import type { InventoryItem, Room } from '../services/tableStorageService';
 import { useState } from 'react';
 import type { RcFile } from 'antd/es/upload/interface';
+import { useLanguage } from '../contexts/LanguageContext';
 
 interface InventoryItemDetailPanelProps {
   visible: boolean;
@@ -26,6 +27,7 @@ export const InventoryItemDetailPanel = ({
   const [form] = Form.useForm();
   const [uploadingPicture, setUploadingPicture] = useState(false);
   const [uploadingAttachment, setUploadingAttachment] = useState(false);
+  const { t } = useLanguage();
 
   const handleEdit = async () => {
     if (!item) return;
@@ -40,7 +42,7 @@ export const InventoryItemDetailPanel = ({
         item.pictureIds,
         item.attachmentIds
       );
-      message.success('Item updated successfully');
+      message.success(t('itemUpdated'));
       setIsEditing(false);
       onSuccess();
     } catch (error) {
@@ -56,7 +58,7 @@ export const InventoryItemDetailPanel = ({
     try {
       setLoading(true);
       await deleteInventoryItem(item.itemId);
-      message.success('Item deleted successfully');
+      message.success(t('itemDeleted'));
       onSuccess();
       onClose();
     } catch (error) {
@@ -191,7 +193,7 @@ export const InventoryItemDetailPanel = ({
 
   return (
     <Drawer
-      title={isEditing ? 'Edit Item' : 'Item Details'}
+      title={isEditing ? t('editItem') : t('itemDetails')}
       placement="right"
       onClose={onClose}
       open={visible}
@@ -208,30 +210,29 @@ export const InventoryItemDetailPanel = ({
           }}
         >
           <div style={{ marginBottom: '24px' }}>
-            <label style={{ fontWeight: 'bold' }}>Item ID:</label>
+            <label style={{ fontWeight: 'bold' }}>{t('itemId')}</label>
             <p>{item.itemId}</p>
           </div>
 
           <Form.Item
             name="itemName"
-            label="Item Name"
-            rules={[{ required: true, message: 'Item name is required' }]}
+            label={t('itemName')}
+            rules={[{ required: true, message: t('itemNameRequired') }]}
           >
             <Input disabled={!isEditing} />
           </Form.Item>
 
           <Form.Item
             name="description"
-            label="Description"
-            rules={[{ required: true, message: 'Description is required' }]}
+            label={t('description')}
           >
             <Input.TextArea disabled={!isEditing} rows={3} />
           </Form.Item>
 
           <Form.Item
             name="roomId"
-            label="Room"
-            rules={[{ required: true, message: 'Room is required' }]}
+            label={t('room')}
+            rules={[{ required: true, message: t('roomRequired') }]}
           >
             <Select disabled={!isEditing}>
               {rooms.map(room => (
@@ -246,7 +247,7 @@ export const InventoryItemDetailPanel = ({
             <>
               <div style={{ marginBottom: '24px' }}>
                 <label style={{ fontWeight: 'bold', marginBottom: '8px', display: 'block' }}>
-                  Pictures ({item.pictureIds.length})
+                  {t('pictures')} ({item.pictureIds.length})
                 </label>
                 {item.pictureIds.length > 0 ? (
                   <List
@@ -275,20 +276,20 @@ export const InventoryItemDetailPanel = ({
                     )}
                   />
                 ) : (
-                  <p style={{ color: '#999' }}>No pictures yet</p>
+                  <p style={{ color: '#999' }}>{t('noPictures')}</p>
                 )}
                 <Upload
                   beforeUpload={handleUploadPicture}
                   maxCount={1}
                   style={{ marginTop: '8px' }}
                 >
-                  <Button loading={uploadingPicture}>Upload Picture</Button>
+                  <Button loading={uploadingPicture}>{t('uploadPicture')}</Button>
                 </Upload>
               </div>
 
               <div style={{ marginBottom: '24px' }}>
                 <label style={{ fontWeight: 'bold', marginBottom: '8px', display: 'block' }}>
-                  Attachments ({item.attachmentIds.length})
+                  {t('attachments')} ({item.attachmentIds.length})
                 </label>
                 {item.attachmentIds.length > 0 ? (
                   <List
@@ -317,7 +318,7 @@ export const InventoryItemDetailPanel = ({
                     )}
                   />
                 ) : (
-                  <p style={{ color: '#999' }}>No attachments yet</p>
+                  <p style={{ color: '#999' }}>{t('noAttachments')}</p>
                 )}
                 <Upload
                   beforeUpload={handleUploadAttachment}
@@ -325,19 +326,19 @@ export const InventoryItemDetailPanel = ({
                   accept=".pdf"
                   style={{ marginTop: '8px' }}
                 >
-                  <Button loading={uploadingAttachment}>Upload PDF</Button>
+                  <Button loading={uploadingAttachment}>{t('uploadPdf')}</Button>
                 </Upload>
               </div>
 
               <div style={{ marginBottom: '24px' }}>
-                <label style={{ fontWeight: 'bold' }}>Created:</label>
+                <label style={{ fontWeight: 'bold' }}>{t('created')}</label>
                 <p>{new Date(item.createdAt).toLocaleString()}</p>
               </div>
 
               <div style={{ marginBottom: '24px' }}>
-                <label style={{ fontWeight: 'bold' }}>Last Modified:</label>
+                <label style={{ fontWeight: 'bold' }}>{t('lastModified')}</label>
                 <p>{new Date(item.lastModifiedAt).toLocaleString()}</p>
-                <p style={{ fontSize: '12px', color: '#666' }}>by {item.lastModifiedBy}</p>
+                <p style={{ fontSize: '12px', color: '#666' }}>{t('by')} {item.lastModifiedBy}</p>
               </div>
             </>
           )}
@@ -345,27 +346,27 @@ export const InventoryItemDetailPanel = ({
           <Space>
             {!isEditing && (
               <Button type="primary" icon={<EditOutlined />} onClick={() => setIsEditing(true)}>
-                Edit
+                {t('edit')}
               </Button>
             )}
             {isEditing && (
               <>
                 <Button type="primary" loading={loading} onClick={handleEdit}>
-                  Save
+                  {t('save')}
                 </Button>
-                <Button onClick={() => setIsEditing(false)}>Cancel</Button>
+                <Button onClick={() => setIsEditing(false)}>{t('cancel')}</Button>
               </>
             )}
             {!isEditing && (
               <Popconfirm
-                title="Delete Item?"
-                description="Are you sure you want to delete this item?"
+                title={t('deleteItem')}
+                description={t('confirmDeleteItem')}
                 onConfirm={handleDelete}
-                okText="Yes"
-                cancelText="No"
+                okText={t('yes')}
+                cancelText={t('no')}
               >
                 <Button danger icon={<DeleteOutlined />}>
-                  Delete
+                  {t('delete')}
                 </Button>
               </Popconfirm>
             )}
