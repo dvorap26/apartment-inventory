@@ -28,7 +28,7 @@ export const ProtectedLayout = ({ children, title }: ProtectedLayoutProps) => {
   return (
     <Layout style={{ minHeight: '100vh' }}>
       <AppHeader title={title} />
-      <Layout.Content style={{ padding: '24px', maxWidth: 1200, margin: '0 auto', width: '100%' }}>
+      <Layout.Content className="protected-content">
         {children}
       </Layout.Content>
     </Layout>

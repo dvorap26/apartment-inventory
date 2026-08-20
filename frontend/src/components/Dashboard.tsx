@@ -1,8 +1,8 @@
 import { Layout, Button, Space, message, Alert, Spin } from 'antd';
-import { PlusOutlined } from '@ant-design/icons';
+import { PlusOutlined, ReloadOutlined } from '@ant-design/icons';
 import { useStorage } from '../contexts/StorageContext';
 import type { Room, InventoryItem } from '../services/tableStorageService';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { InventoryTable } from './InventoryTable';
 import { RoomModal } from './RoomModal';
 import { RoomDetailPanel } from './RoomDetailPanel';
@@ -21,6 +21,14 @@ export const Dashboard = () => {
   const [editingRoom, setEditingRoom] = useState<Room | null>(null);
   const [selectedItem, setSelectedItem] = useState<InventoryItem | null>(null);
   const [selectedRoomIdForItem, setSelectedRoomIdForItem] = useState<string | null>(null);
+
+  useEffect(() => {
+    setSelectedItem((currentItem) =>
+      currentItem
+        ? inventoryItems.find((item) => item.itemId === currentItem.itemId) ?? currentItem
+        : null
+    );
+  }, [inventoryItems]);
 
   // Refresh data
   const handleRefresh = async () => {
@@ -84,7 +92,7 @@ export const Dashboard = () => {
   if (isLoading) {
     return (
       <Layout style={{ minHeight: '100%' }}>
-        <Layout.Content style={{ padding: '24px' }}>
+        <Layout.Content className="dashboard-content">
           <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '400px' }}>
             <Spin size="large" tip={t('loadingInventory')} />
           </div>
@@ -95,7 +103,7 @@ export const Dashboard = () => {
 
   return (
     <Layout style={{ minHeight: '100%' }}>
-      <Layout.Content style={{ padding: '24px' }}>
+      <Layout.Content className="dashboard-content">
         {error && (
           <Alert
             message={t('error')}
@@ -107,7 +115,7 @@ export const Dashboard = () => {
           />
         )}
 
-        <div style={{ marginBottom: '24px' }}>
+        <div className="dashboard-actions">
           <Space wrap>
             <Button
               type="primary"
@@ -115,10 +123,10 @@ export const Dashboard = () => {
               icon={<PlusOutlined />}
               onClick={handleCreateRoom}
             >
-              {t('addRoom')}
+              <span className="button-label">{t('addRoom')}</span>
             </Button>
-            <Button onClick={handleRefresh}>
-              {t('refresh')}
+            <Button icon={<ReloadOutlined />} onClick={handleRefresh}>
+              <span className="button-label">{t('refresh')}</span>
             </Button>
             <ExportButton />
           </Space>

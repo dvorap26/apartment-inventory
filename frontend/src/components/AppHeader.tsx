@@ -1,4 +1,4 @@
-import { Button, Layout, Typography, Spin, message, Select } from 'antd';
+import { Button, Layout, Typography, Spin, message, Select, Tooltip } from 'antd';
 import { LogoutOutlined } from '@ant-design/icons';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -25,42 +25,49 @@ export const AppHeader = ({ title }: AppHeaderProps) => {
   };
 
   return (
-    <Header
-      style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        background: '#001529',
-        color: '#fff',
-        padding: '0 24px'
-      }}
-    >
-      <Typography.Title level={3} style={{ color: '#fff', margin: 0 }}>
+    <Header className="app-header">
+      <Typography.Title className="app-header-title" level={3} style={{ color: '#fff', margin: 0 }}>
         {title}
       </Typography.Title>
       {isAuthenticated && !isLoading && (
-        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-          <Text style={{ color: '#fff' }}>
+        <div className="app-header-actions">
+          <Text className="app-header-user" style={{ color: '#fff' }}>
             {account?.name}
           </Text>
           <Select
             aria-label={t('language')}
             value={language}
             onChange={setLanguage}
+            className="language-selector"
             style={{ width: 110 }}
             options={[
-              { value: 'en', label: t('english') },
-              { value: 'cs', label: t('czech') },
+              {
+                value: 'en',
+                label: <>
+                  <span className="language-label-full">{t('english')}</span>
+                  <span className="language-label-short">EN</span>
+                </>,
+              },
+              {
+                value: 'cs',
+                label: <>
+                  <span className="language-label-full">{t('czech')}</span>
+                  <span className="language-label-short">CZ</span>
+                </>,
+              },
             ]}
           />
-          <Button
-            type="primary"
-            danger
-            icon={<LogoutOutlined />}
-            onClick={handleLogout}
-          >
-            {t('logout')}
-          </Button>
+          <Tooltip title={t('logout')}>
+            <Button
+              className="logout-button"
+              type="primary"
+              danger
+              icon={<LogoutOutlined />}
+              onClick={handleLogout}
+            >
+              <span className="button-label">{t('logout')}</span>
+            </Button>
+          </Tooltip>
         </div>
       )}
       {isLoading && <Spin style={{ color: '#fff' }} />}
