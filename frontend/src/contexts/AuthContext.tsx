@@ -8,6 +8,7 @@ interface AuthContextType {
   account: AccountInfo | null;
   isLoading: boolean;
   isLoggingIn: boolean;
+  authError: string | null;
   login: () => Promise<void>;
   logout: () => Promise<void>;
   getAccessToken: (scopes?: string[]) => Promise<string>;
@@ -21,6 +22,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [account, setAccount] = useState<AccountInfo | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isLoggingIn, setIsLoggingIn] = useState(false);
+  const [authError, setAuthError] = useState<string | null>(null);
   const [hasWritePermission, setHasWritePermission] = useState(false);
   const loginRequestRef = useRef<Promise<void> | null>(null);
 
@@ -45,6 +47,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         }
       } catch (error) {
         console.error('Auth initialization error:', error);
+        setAuthError(error instanceof Error ? error.message : 'Authentication could not be completed.');
       } finally {
         setIsLoading(false);
       }
@@ -74,12 +77,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     const loginRequest = (async () => {
       setIsLoggingIn(true);
+      setAuthError(null);
 
       try {
         await msalInitialization;
         await msalInstance.loginRedirect();
       } catch (error) {
         console.error('Login failed:', error);
+        setAuthError(error instanceof Error ? error.message : 'Unable to start sign-in.');
         throw error;
       } finally {
         setIsLoggingIn(false);
@@ -127,6 +132,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         account,
         isLoading,
         isLoggingIn,
+        authError,
         login,
         logout,
         getAccessToken,

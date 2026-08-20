@@ -1,4 +1,4 @@
-import { Layout, Button, Empty, Spin } from 'antd';
+import { Alert, Layout, Button, Empty, Spin } from 'antd';
 import { LoginOutlined } from '@ant-design/icons';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -7,7 +7,7 @@ import './WelcomePage.css';
 const { Content } = Layout;
 
 export const WelcomePage = () => {
-  const { isLoading, isLoggingIn, login } = useAuth();
+  const { authError, isLoading, isLoggingIn, login } = useAuth();
   const { t } = useLanguage();
 
   const handleLogin = async () => {
@@ -39,6 +39,15 @@ export const WelcomePage = () => {
             <p style={{ fontSize: '16px', marginBottom: '24px', color: '#666' }}>
               {t('loginPrompt')}
             </p>
+            {authError && (
+              <Alert
+                message={t('error')}
+                description={authError}
+                type="error"
+                showIcon
+                style={{ marginBottom: '24px', textAlign: 'left' }}
+              />
+            )}
             <Button
               type="primary"
               size="large"
