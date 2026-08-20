@@ -2,41 +2,31 @@ import { useEffect, useState } from 'react';
 import { AuthProvider } from './contexts/AuthContext';
 import { StorageProvider } from './contexts/StorageContext';
 import { ProtectedLayout } from './components/ProtectedLayout';
+import { Dashboard } from './components/Dashboard';
 import { useAuth } from './contexts/AuthContext';
-import { useStorage } from './contexts/StorageContext';
-import { Empty, Spin, Alert } from 'antd';
+import { Spin } from 'antd';
 import 'antd/dist/reset.css';
 import './App.css';
 
 function AppContent() {
   const { isLoading } = useAuth();
-  const { isInitialized, error } = useStorage();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  if (!mounted || isLoading || !isInitialized) {
+  if (!mounted || isLoading) {
     return (
       <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>
-        <Spin size="large" tip="Loading storage services..." />
+        <Spin size="large" />
       </div>
     );
   }
 
   return (
     <ProtectedLayout title="Apartment Inventory">
-      {error && (
-        <Alert
-          message="Storage Error"
-          description={error}
-          type="error"
-          showIcon
-          style={{ marginBottom: '24px' }}
-        />
-      )}
-      <Empty description="Application ready - Dashboard coming soon" />
+      <Dashboard />
     </ProtectedLayout>
   );
 }
