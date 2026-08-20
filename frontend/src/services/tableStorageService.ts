@@ -1,6 +1,6 @@
-import { TableClient, AzureNamedKeyCredential } from "@azure/data-tables";
+import { TableClient } from "@azure/data-tables";
+import type { TableEntity } from "@azure/data-tables";
 import { storageConfig } from "../config/authConfig";
-import { useAuth } from "../contexts/AuthContext";
 
 export interface Room {
   roomId: string;
@@ -26,8 +26,11 @@ export class TableStorageService {
   private roomsClient: TableClient | null = null;
   private inventoryClient: TableClient | null = null;
   private accessToken: string | null = null;
+  private getAccessToken: (scopes?: string[]) => Promise<string>;
 
-  constructor(private getAccessToken: (scopes?: string[]) => Promise<string>) {}
+  constructor(getAccessToken: (scopes?: string[]) => Promise<string>) {
+    this.getAccessToken = getAccessToken;
+  }
 
   async initialize(): Promise<void> {
     try {
@@ -59,7 +62,7 @@ export class TableStorageService {
     try {
       const rooms: Room[] = [];
       for await (const entity of this.roomsClient.listEntities<Room>()) {
-        rooms.push(entity);
+        rooms.push(this.mapRoomEntity(entity));
       }
       return rooms;
     } catch (error) {
@@ -73,7 +76,7 @@ export class TableStorageService {
     
     try {
       const room = await this.roomsClient.getEntity<Room>(roomId, roomId);
-      return room;
+      return this.mapRoomEntity(room);
     } catch (error) {
       if ((error as any).code === "ResourceNotFound") {
         return null;
@@ -104,7 +107,7 @@ export class TableStorageService {
     };
 
     try {
-      await this.roomsClient.createEntity(room);
+      await this.roomsClient.createEntity(this.toRoomEntity(room));
       return room;
     } catch (error) {
       console.error("Failed to create room:", error);
@@ -132,7 +135,7 @@ export class TableStorageService {
     };
 
     try {
-      await this.roomsClient.updateEntity(updatedRoom);
+      await this.roomsClient.updateEntity(this.toRoomEntity(updatedRoom));
       return updatedRoom;
     } catch (error) {
       console.error("Failed to update room:", error);
@@ -163,7 +166,7 @@ export class TableStorageService {
     try {
       const items: InventoryItem[] = [];
       for await (const entity of this.inventoryClient.listEntities<InventoryItem>()) {
-        items.push(entity);
+        items.push(this.mapInventoryItemEntity(entity));
       }
       return items;
     } catch (error) {
@@ -182,7 +185,7 @@ export class TableStorageService {
     
     try {
       const item = await this.inventoryClient.getEntity<InventoryItem>(itemId, itemId);
-      return item;
+      return this.mapInventoryItemEntity(item);
     } catch (error) {
       if ((error as any).code === "ResourceNotFound") {
         return null;
@@ -216,7 +219,7 @@ export class TableStorageService {
     };
 
     try {
-      await this.inventoryClient.createEntity(item);
+      await this.inventoryClient.createEntity(this.toInventoryItemEntity(item));
       return item;
     } catch (error) {
       console.error("Failed to create inventory item:", error);
@@ -250,7 +253,7 @@ export class TableStorageService {
     };
 
     try {
-      await this.inventoryClient.updateEntity(updatedItem);
+      await this.inventoryClient.updateEntity(this.toInventoryItemEntity(updatedItem));
       return updatedItem;
     } catch (error) {
       console.error("Failed to update inventory item:", error);
@@ -272,11 +275,43 @@ export class TableStorageService {
   private generateId(): string {
     return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
   }
+
+  private toRoomEntity(room: Room): TableEntity<Room> {
+    return {
+      ...room,
+      partitionKey: room.roomId,
+      rowKey: room.roomId
+    };
+  }
+
+  private mapRoomEntity(entity: Room & { partitionKey?: string; rowKey?: string }): Room {
+    const { partitionKey: _partitionKey, rowKey: _rowKey, ...room } = entity;
+    return room;
+  }
+
+  private toInventoryItemEntity(item: InventoryItem): TableEntity<InventoryItem> {
+    return {
+      ...item,
+      partitionKey: item.itemId,
+      rowKey: item.itemId
+    };
+  }
+
+  private mapInventoryItemEntity(
+    entity: InventoryItem & { partitionKey?: string; rowKey?: string }
+  ): InventoryItem {
+    const { partitionKey: _partitionKey, rowKey: _rowKey, ...item } = entity;
+    return item;
+  }
 }
 
 // Custom bearer token credential for MSAL
 class BearerTokenAuthCredential {
-  constructor(private token: string) {}
+  private token: string;
+
+  constructor(token: string) {
+    this.token = token;
+  }
 
   async getToken(): Promise<{ token: string; expiresOnTimestamp: number }> {
     return {

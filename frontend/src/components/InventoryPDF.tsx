@@ -1,5 +1,5 @@
 import { Document, Page, Text, View, StyleSheet, Image, Font } from '@react-pdf/renderer';
-import { Room, InventoryItem } from '../services/tableStorageService';
+import type { Room, InventoryItem } from '../services/tableStorageService';
 
 // Register font for better PDF rendering
 Font.register({

@@ -1,6 +1,6 @@
 import { Modal, Form, Input, Select, Button, message } from 'antd';
-import { useStorage } from '../../contexts/StorageContext';
-import { Room } from '../../services/tableStorageService';
+import { useStorage } from '../contexts/StorageContext';
+import type { Room } from '../services/tableStorageService';
 import { useState } from 'react';
 
 interface InventoryItemModalProps {

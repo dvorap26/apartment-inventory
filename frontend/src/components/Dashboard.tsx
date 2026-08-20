@@ -1,8 +1,8 @@
-import { Layout, Button, Space, message, Alert, Empty, Spin } from 'antd';
+import { Layout, Button, Space, message, Alert, Spin } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
 import { useStorage } from '../contexts/StorageContext';
-import { Room, InventoryItem } from '../services/tableStorageService';
-import { useState, useEffect } from 'react';
+import type { Room, InventoryItem } from '../services/tableStorageService';
+import { useState } from 'react';
 import { InventoryTable } from './InventoryTable';
 import { RoomModal } from './RoomModal';
 import { RoomDetailPanel } from './RoomDetailPanel';

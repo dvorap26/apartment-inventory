@@ -1,5 +1,6 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { AccountInfo } from '@azure/msal-browser';
+import { createContext, useContext, useState, useEffect } from 'react';
+import type { ReactNode } from 'react';
+import type { AccountInfo } from '@azure/msal-browser';
 import { msalInstance, storageScopes } from '../config/msalInstance';
 
 interface AuthContextType {
