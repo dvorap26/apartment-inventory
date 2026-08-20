@@ -1,5 +1,6 @@
 import { Document, Page, Text, View, StyleSheet, Image, Font } from '@react-pdf/renderer';
 import type { Room, InventoryItem } from '../services/tableStorageService';
+import type { Language } from '../contexts/LanguageContext';
 
 // Register font for better PDF rendering
 Font.register({
@@ -86,13 +87,17 @@ interface InventoryPDFProps {
   rooms: Room[];
   inventoryItems: InventoryItem[];
   pictureUrls?: { [key: string]: string };
+  language: Language;
 }
 
-export const InventoryPDF = ({ rooms, inventoryItems, pictureUrls = {} }: InventoryPDFProps) => {
+export const InventoryPDF = ({ rooms, inventoryItems, pictureUrls = {}, language }: InventoryPDFProps) => {
+  const labels = language === 'cs'
+    ? { title: 'Inventar bytu', pictures: 'Fotografie', noItems: 'V teto mistnosti nejsou zadne polozky', generated: 'Vygenerovano' }
+    : { title: 'Apartment Inventory', pictures: 'Pictures', noItems: 'No items in this room', generated: 'Generated on' };
   return (
     <Document>
       <Page size="A4" style={styles.page}>
-        <Text style={styles.title}>Apartment Inventory</Text>
+        <Text style={styles.title}>{labels.title}</Text>
 
         {rooms.map((room) => {
           const roomItems = inventoryItems.filter(item => item.roomId === room.roomId);
@@ -110,7 +115,7 @@ export const InventoryPDF = ({ rooms, inventoryItems, pictureUrls = {} }: Invent
                     {item.pictureIds.length > 0 && (
                       <View style={styles.picturesContainer}>
                         <Text style={styles.picturesLabel}>
-                          Pictures ({item.pictureIds.length})
+                          {labels.pictures} ({item.pictureIds.length})
                         </Text>
                         {item.pictureIds.map((pictureId, index) => {
                           const pictureName = pictureId.split('/').pop() || `Picture ${index + 1}`;
@@ -133,14 +138,14 @@ export const InventoryPDF = ({ rooms, inventoryItems, pictureUrls = {} }: Invent
                   </View>
                 ))
               ) : (
-                <Text style={styles.noItems}>No items in this room</Text>
+                <Text style={styles.noItems}>{labels.noItems}</Text>
               )}
             </View>
           );
         })}
 
         <Text style={styles.timestamp}>
-          Generated on {new Date().toLocaleString()}
+          {labels.generated} {new Date().toLocaleString(language)}
         </Text>
       </Page>
     </Document>

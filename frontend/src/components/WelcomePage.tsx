@@ -1,12 +1,14 @@
 import { Layout, Button, Empty, Spin } from 'antd';
 import { LoginOutlined } from '@ant-design/icons';
 import { useAuth } from '../contexts/AuthContext';
+import { useLanguage } from '../contexts/LanguageContext';
 import './WelcomePage.css';
 
 const { Content } = Layout;
 
 export const WelcomePage = () => {
   const { isLoading, isLoggingIn, login } = useAuth();
+  const { t } = useLanguage();
 
   const handleLogin = async () => {
     try {
@@ -31,11 +33,11 @@ export const WelcomePage = () => {
       <Content style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>
         <div className="welcome-container">
           <Empty
-            description="Welcome to Apartment Inventory"
+            description={t('loginWelcome')}
             style={{ marginBottom: '32px' }}
           >
             <p style={{ fontSize: '16px', marginBottom: '24px', color: '#666' }}>
-              Please sign in with your work account to continue
+              {t('loginPrompt')}
             </p>
             <Button
               type="primary"
@@ -45,7 +47,7 @@ export const WelcomePage = () => {
               loading={isLoggingIn}
               disabled={isLoggingIn}
             >
-              Sign in with Microsoft
+              {t('signIn')}
             </Button>
           </Empty>
         </div>

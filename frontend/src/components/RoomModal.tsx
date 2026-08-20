@@ -2,6 +2,7 @@ import { Modal, Form, Input, Button, message } from 'antd';
 import { useStorage } from '../contexts/StorageContext';
 import type { Room } from '../services/tableStorageService';
 import { useState } from 'react';
+import { useLanguage } from '../contexts/LanguageContext';
 
 interface RoomModalProps {
   visible: boolean;
@@ -14,16 +15,17 @@ export const RoomModal = ({ visible, room, onClose, onSuccess }: RoomModalProps)
   const { createRoom, updateRoom } = useStorage();
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
+  const { t } = useLanguage();
 
   const handleSubmit = async (values: { roomName: string }) => {
     try {
       setLoading(true);
       if (room) {
         await updateRoom(room.roomId, values.roomName);
-        message.success('Room updated successfully');
+        message.success(t('roomUpdated'));
       } else {
         await createRoom(values.roomName);
-        message.success('Room created successfully');
+        message.success(t('roomCreated'));
       }
       form.resetFields();
       onSuccess();
@@ -43,15 +45,15 @@ export const RoomModal = ({ visible, room, onClose, onSuccess }: RoomModalProps)
 
   return (
     <Modal
-      title={room ? 'Edit Room' : 'Create New Room'}
+      title={room ? t('editRoom') : t('createRoom')}
       open={visible}
       onCancel={handleCancel}
       footer={[
         <Button key="cancel" onClick={handleCancel}>
-          Cancel
+          {t('cancel')}
         </Button>,
         <Button key="submit" type="primary" loading={loading} onClick={() => form.submit()}>
-          {room ? 'Update' : 'Create'}
+          {room ? t('update') : t('create')}
         </Button>,
       ]}
     >
@@ -65,14 +67,14 @@ export const RoomModal = ({ visible, room, onClose, onSuccess }: RoomModalProps)
       >
         <Form.Item
           name="roomName"
-          label="Room Name"
+          label={t('roomName')}
           rules={[
-            { required: true, message: 'Room name is required' },
-            { min: 1, message: 'Room name cannot be empty' },
-            { max: 100, message: 'Room name must be less than 100 characters' },
+            { required: true, message: t('roomNameRequired') },
+            { min: 1, message: t('roomNameEmpty') },
+            { max: 100, message: t('roomNameLength') },
           ]}
         >
-          <Input placeholder="Enter room name (e.g., Living Room, Kitchen)" />
+          <Input placeholder={t('roomNamePlaceholder')} />
         </Form.Item>
       </Form>
     </Modal>

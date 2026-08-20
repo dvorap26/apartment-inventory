@@ -1,6 +1,7 @@
-import { Button, Layout, Typography, Spin, message } from 'antd';
+import { Button, Layout, Typography, Spin, message, Select } from 'antd';
 import { LogoutOutlined } from '@ant-design/icons';
 import { useAuth } from '../contexts/AuthContext';
+import { useLanguage } from '../contexts/LanguageContext';
 
 const { Header } = Layout;
 const { Text } = Typography;
@@ -11,13 +12,14 @@ interface AppHeaderProps {
 
 export const AppHeader = ({ title }: AppHeaderProps) => {
   const { isAuthenticated, account, logout, isLoading } = useAuth();
+  const { language, setLanguage, t } = useLanguage();
 
   const handleLogout = async () => {
     try {
       await logout();
-      message.success('Logged out successfully');
+      message.success(t('loggedOut'));
     } catch (error) {
-      message.error('Logout failed');
+      message.error(t('logoutFailed'));
       console.error(error);
     }
   };
@@ -41,13 +43,23 @@ export const AppHeader = ({ title }: AppHeaderProps) => {
           <Text style={{ color: '#fff' }}>
             {account?.name}
           </Text>
+          <Select
+            aria-label={t('language')}
+            value={language}
+            onChange={setLanguage}
+            style={{ width: 110 }}
+            options={[
+              { value: 'en', label: t('english') },
+              { value: 'cs', label: t('czech') },
+            ]}
+          />
           <Button
             type="primary"
             danger
             icon={<LogoutOutlined />}
             onClick={handleLogout}
           >
-            Logout
+            {t('logout')}
           </Button>
         </div>
       )}
