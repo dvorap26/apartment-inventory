@@ -28,7 +28,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const initAuth = async () => {
       try {
         await msalInitialization;
-        const accounts = msalInstance.getAllAccounts();
+        const loginResponse = await msalInstance.handleRedirectPromise();
+        const accounts = loginResponse?.account
+          ? [loginResponse.account]
+          : msalInstance.getAllAccounts();
         if (accounts.length > 0) {
           setAccount(accounts[0]);
           setIsAuthenticated(true);
@@ -74,17 +77,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
       try {
         await msalInitialization;
-        const response = await msalInstance.loginPopup();
-        setAccount(response.account);
-        setIsAuthenticated(true);
-
-        // Check write permission
-        try {
-          await getAccessTokenInternal(storageScopes.write);
-          setHasWritePermission(true);
-        } catch {
-          setHasWritePermission(false);
-        }
+        await msalInstance.loginRedirect();
       } catch (error) {
         console.error('Login failed:', error);
         throw error;
