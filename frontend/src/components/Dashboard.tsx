@@ -56,12 +56,6 @@ export const Dashboard = () => {
     setRoomModalVisible(true);
   };
 
-  const handleEditRoom = (room: Room) => {
-    setEditingRoom(room);
-    setRoomModalVisible(true);
-    setRoomDetailVisible(false);
-  };
-
   const handleSelectRoom = (room: Room) => {
     setEditingRoom(room);
     setRoomDetailVisible(true);
@@ -192,7 +186,7 @@ export const Dashboard = () => {
           visible={roomDetailVisible}
           room={editingRoom}
           onClose={handleRoomDetailClose}
-          onEdit={handleEditRoom}
+          onRoomUpdated={setEditingRoom}
           onSuccess={() => {
             loadRooms();
             loadInventoryItems();
