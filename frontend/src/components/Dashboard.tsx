@@ -12,7 +12,16 @@ import { ExportButton } from './ExportButton';
 import { useLanguage } from '../contexts/LanguageContext';
 
 export const Dashboard = () => {
-  const { rooms, inventoryItems, isLoading, error, loadRooms, loadInventoryItems } = useStorage();
+  const {
+    rooms,
+    inventoryItems,
+    isLoading,
+    error,
+    loadRooms,
+    loadInventoryItems,
+    moveRoom,
+    moveInventoryItem,
+  } = useStorage();
   const { t } = useLanguage();
   const [roomModalVisible, setRoomModalVisible] = useState(false);
   const [itemModalVisible, setItemModalVisible] = useState(false);
@@ -77,6 +86,22 @@ export const Dashboard = () => {
   const handleSelectItem = (item: InventoryItem) => {
     setSelectedItem(item);
     setItemDetailVisible(true);
+  };
+
+  const handleMoveRoom = async (roomId: string, direction: -1 | 1) => {
+    try {
+      await moveRoom(roomId, direction);
+    } catch (error) {
+      message.error(error instanceof Error ? error.message : t('error'));
+    }
+  };
+
+  const handleMoveItem = async (itemId: string, direction: -1 | 1) => {
+    try {
+      await moveInventoryItem(itemId, direction);
+    } catch (error) {
+      message.error(error instanceof Error ? error.message : t('error'));
+    }
   };
 
   const handleItemModalClose = () => {
@@ -147,6 +172,8 @@ export const Dashboard = () => {
             onAddItem={handleAddItem}
             onEditRoom={handleSelectRoom}
             onSelectItem={handleSelectItem}
+            onMoveRoom={(roomId, direction) => void handleMoveRoom(roomId, direction)}
+            onMoveItem={(itemId, direction) => void handleMoveItem(itemId, direction)}
           />
         )}
 

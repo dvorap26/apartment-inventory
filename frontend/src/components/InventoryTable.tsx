@@ -1,5 +1,5 @@
-import { Table, Button, Space, Collapse, Empty, Alert } from 'antd';
-import { PlusOutlined, EditOutlined } from '@ant-design/icons';
+import { Table, Button, Space, Collapse, Empty, Alert, Tooltip } from 'antd';
+import { PlusOutlined, EditOutlined, UpOutlined, DownOutlined } from '@ant-design/icons';
 import type { Room, InventoryItem } from '../services/tableStorageService';
 import { useLanguage } from '../contexts/LanguageContext';
 
@@ -9,6 +9,8 @@ interface InventoryTableProps {
   onAddItem: (roomId: string) => void;
   onEditRoom: (room: Room) => void;
   onSelectItem: (item: InventoryItem) => void;
+  onMoveRoom: (roomId: string, direction: -1 | 1) => void;
+  onMoveItem: (itemId: string, direction: -1 | 1) => void;
 }
 
 export const InventoryTable = ({
@@ -17,6 +19,8 @@ export const InventoryTable = ({
   onAddItem,
   onEditRoom,
   onSelectItem,
+  onMoveRoom,
+  onMoveItem,
 }: InventoryTableProps) => {
   const { t } = useLanguage();
   if (rooms.length === 0) {
@@ -31,7 +35,7 @@ export const InventoryTable = ({
     );
   }
 
-  const items = rooms.map((room) => {
+  const items = rooms.map((room, roomIndex) => {
     const roomItems = inventoryItems.filter(item => item.roomId === room.roomId);
 
     const columns = [
@@ -54,6 +58,32 @@ export const InventoryTable = ({
         width: '20%',
         render: (_: unknown, record: InventoryItem) => (
           <Space>
+            <Tooltip title={t('moveUp')}>
+              <Button
+                aria-label={t('moveUp')}
+                disabled={roomItems.findIndex((item) => item.itemId === record.itemId) === 0}
+                icon={<UpOutlined />}
+                size="small"
+                type="text"
+                onClick={(event) => {
+                  event.stopPropagation();
+                  onMoveItem(record.itemId, -1);
+                }}
+              />
+            </Tooltip>
+            <Tooltip title={t('moveDown')}>
+              <Button
+                aria-label={t('moveDown')}
+                disabled={roomItems.findIndex((item) => item.itemId === record.itemId) === roomItems.length - 1}
+                icon={<DownOutlined />}
+                size="small"
+                type="text"
+                onClick={(event) => {
+                  event.stopPropagation();
+                  onMoveItem(record.itemId, 1);
+                }}
+              />
+            </Tooltip>
             <Button
               type="primary"
               size="small"
@@ -74,6 +104,26 @@ export const InventoryTable = ({
             {room.roomName} ({roomItems.length} {t('items')})
           </span>
           <Space onClick={(e) => e.stopPropagation()}>
+            <Tooltip title={t('moveUp')}>
+              <Button
+                aria-label={t('moveUp')}
+                disabled={roomIndex === 0}
+                icon={<UpOutlined />}
+                size="small"
+                type="text"
+                onClick={() => onMoveRoom(room.roomId, -1)}
+              />
+            </Tooltip>
+            <Tooltip title={t('moveDown')}>
+              <Button
+                aria-label={t('moveDown')}
+                disabled={roomIndex === rooms.length - 1}
+                icon={<DownOutlined />}
+                size="small"
+                type="text"
+                onClick={() => onMoveRoom(room.roomId, 1)}
+              />
+            </Tooltip>
             <Button
               type="text"
               size="small"
