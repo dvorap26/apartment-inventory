@@ -74,12 +74,13 @@ export const ExportButton = () => {
   return (
     <>
       <Button
+        className="export-button"
         icon={<DownloadOutlined />}
         onClick={handleExportPDF}
         loading={loading}
         disabled={rooms.length === 0}
       >
-        {t('exportPdf')}
+        <span className="button-label">{t('exportPdf')}</span>
       </Button>
 
       <Modal

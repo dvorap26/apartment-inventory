@@ -51,7 +51,7 @@
 }
 
 #root {
-  width: 1126px;
+  width: 1200px;
   max-width: 100%;
   margin: 0 auto;
   text-align: center;
@@ -64,6 +64,94 @@
 
 body {
   margin: 0;
+}
+
+.app-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #001529;
+  color: #fff;
+  padding: 0 24px;
+}
+
+.app-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.protected-content {
+  padding: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.dashboard-content {
+  padding: 24px;
+}
+
+.dashboard-actions {
+  margin-bottom: 24px;
+}
+
+.language-label-short {
+  display: none;
+}
+
+@media (max-width: 600px) {
+  #root {
+    width: 100%;
+    border-inline: 0;
+  }
+
+  .app-header {
+    padding: 0 12px;
+  }
+
+  .app-header-title {
+    font-size: 18px !important;
+  }
+
+  .app-header-actions {
+    gap: 8px;
+  }
+
+  .app-header-user {
+    display: none;
+  }
+
+  .language-selector {
+    width: 64px !important;
+  }
+
+  .language-label-full {
+    display: none;
+  }
+
+  .language-label-short {
+    display: inline;
+  }
+
+  .logout-button,
+  .dashboard-actions .ant-btn,
+  .export-button {
+    padding-inline: 8px;
+  }
+
+  .button-label {
+    display: none;
+  }
+
+  .protected-content,
+  .dashboard-content {
+    padding: 12px;
+  }
+
+  .dashboard-content .ant-table-wrapper {
+    margin-inline: -12px;
+  }
 }
 
 h1,
