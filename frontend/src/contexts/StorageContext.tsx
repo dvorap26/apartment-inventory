@@ -17,9 +17,11 @@ interface StorageContextType {
   loadInventoryItems: () => Promise<void>;
   createRoom: (roomName: string) => Promise<Room>;
   updateRoom: (roomId: string, roomName: string) => Promise<Room>;
+  moveRoom: (roomId: string, direction: -1 | 1) => Promise<void>;
   deleteRoom: (roomId: string) => Promise<void>;
   createInventoryItem: (itemName: string, description: string, roomId: string) => Promise<InventoryItem>;
   updateInventoryItem: (itemId: string, itemName: string, description: string, roomId: string, pictureIds: string[], attachmentIds: string[]) => Promise<InventoryItem>;
+  moveInventoryItem: (itemId: string, direction: -1 | 1) => Promise<void>;
   deleteInventoryItem: (itemId: string) => Promise<void>;
 }
 
@@ -150,6 +152,30 @@ export const StorageProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  const moveRoom = async (roomId: string, direction: -1 | 1): Promise<void> => {
+    if (!tableService || !account) throw new Error('Storage not initialized');
+
+    const currentIndex = rooms.findIndex((room) => room.roomId === roomId);
+    const targetIndex = currentIndex + direction;
+    if (currentIndex < 0 || targetIndex < 0 || targetIndex >= rooms.length) return;
+
+    const reorderedRooms = [...rooms];
+    [reorderedRooms[currentIndex], reorderedRooms[targetIndex]] =
+      [reorderedRooms[targetIndex], reorderedRooms[currentIndex]];
+
+    try {
+      const updatedRooms = await tableService.updateRoomOrder(
+        reorderedRooms,
+        account.name || 'Unknown'
+      );
+      setRooms(updatedRooms);
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to reorder rooms';
+      setError(errorMessage);
+      throw err;
+    }
+  };
+
   const createInventoryItem = async (itemName: string, description: string, roomId: string): Promise<InventoryItem> => {
     if (!tableService || !account) throw new Error('Storage not initialized');
 
@@ -206,6 +232,35 @@ export const StorageProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  const moveInventoryItem = async (itemId: string, direction: -1 | 1): Promise<void> => {
+    if (!tableService || !account) throw new Error('Storage not initialized');
+
+    const item = inventoryItems.find((inventoryItem) => inventoryItem.itemId === itemId);
+    if (!item) return;
+
+    const roomItems = inventoryItems.filter((inventoryItem) => inventoryItem.roomId === item.roomId);
+    const currentIndex = roomItems.findIndex((inventoryItem) => inventoryItem.itemId === itemId);
+    const targetIndex = currentIndex + direction;
+    if (targetIndex < 0 || targetIndex >= roomItems.length) return;
+
+    [roomItems[currentIndex], roomItems[targetIndex]] = [roomItems[targetIndex], roomItems[currentIndex]];
+
+    try {
+      const updatedRoomItems = await tableService.updateInventoryItemOrder(
+        roomItems,
+        account.name || 'Unknown'
+      );
+      const updatedItemsById = new Map(updatedRoomItems.map((updatedItem) => [updatedItem.itemId, updatedItem]));
+      setInventoryItems(inventoryItems.map((inventoryItem) =>
+        updatedItemsById.get(inventoryItem.itemId) ?? inventoryItem
+      ));
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to reorder inventory items';
+      setError(errorMessage);
+      throw err;
+    }
+  };
+
   return (
     <StorageContext.Provider
       value={{
@@ -220,9 +275,11 @@ export const StorageProvider = ({ children }: { children: ReactNode }) => {
         loadInventoryItems,
         createRoom,
         updateRoom,
+        moveRoom,
         deleteRoom,
         createInventoryItem,
         updateInventoryItem,
+        moveInventoryItem,
         deleteInventoryItem
       }}
     >

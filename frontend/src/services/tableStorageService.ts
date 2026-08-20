@@ -8,6 +8,7 @@ export interface Room {
   createdAt: string;
   lastModifiedAt: string;
   lastModifiedBy: string;
+  sortOrder?: number;
 }
 
 export interface InventoryItem {
@@ -20,6 +21,7 @@ export interface InventoryItem {
   createdAt: string;
   lastModifiedAt: string;
   lastModifiedBy: string;
+  sortOrder?: number;
 }
 
 type StoredInventoryItem = Omit<InventoryItem, "pictureIds" | "attachmentIds"> & {
@@ -69,7 +71,7 @@ export class TableStorageService {
       for await (const entity of this.roomsClient.listEntities<Room>()) {
         rooms.push(this.mapRoomEntity(entity));
       }
-      return rooms;
+      return this.sortByOrder(rooms);
     } catch (error) {
       console.error("Failed to get rooms:", error);
       throw error;
@@ -108,7 +110,8 @@ export class TableStorageService {
       roomName,
       createdAt: now,
       lastModifiedAt: now,
-      lastModifiedBy
+      lastModifiedBy,
+      sortOrder: existingRooms.length
     };
 
     try {
@@ -157,6 +160,23 @@ export class TableStorageService {
       throw new Error("Cannot delete room with inventory items");
     }
 
+    async updateRoomOrder(rooms: Room[], lastModifiedBy: string): Promise<Room[]> {
+      if (!this.roomsClient) throw new Error("Table storage not initialized");
+
+      const now = new Date().toISOString();
+      const orderedRooms = rooms.map((room, sortOrder) => ({
+        ...room,
+        sortOrder,
+        lastModifiedAt: now,
+        lastModifiedBy
+      }));
+
+      await Promise.all(
+        orderedRooms.map((room) => this.roomsClient!.upsertEntity(this.toRoomEntity(room), "Replace"))
+      );
+      return orderedRooms;
+    }
+
     try {
       await this.roomsClient.deleteEntity(roomId, roomId);
     } catch (error) {
@@ -173,7 +193,7 @@ export class TableStorageService {
       for await (const entity of this.inventoryClient.listEntities<StoredInventoryItem>()) {
         items.push(this.mapInventoryItemEntity(entity));
       }
-      return items;
+      return this.sortByOrder(items);
     } catch (error) {
       console.error("Failed to get inventory items:", error);
       throw error;
@@ -182,7 +202,7 @@ export class TableStorageService {
 
   async getInventoryItemsByRoom(roomId: string): Promise<InventoryItem[]> {
     const allItems = await this.getInventoryItems();
-    return allItems.filter(item => item.roomId === roomId);
+    return this.sortByOrder(allItems.filter(item => item.roomId === roomId));
   }
 
   async getInventoryItem(itemId: string): Promise<InventoryItem | null> {
@@ -210,6 +230,7 @@ export class TableStorageService {
     
     const itemId = this.generateId();
     const now = new Date().toISOString();
+    const roomItems = await this.getInventoryItemsByRoom(roomId);
     
     const item: InventoryItem = {
       itemId,
@@ -220,7 +241,8 @@ export class TableStorageService {
       attachmentIds: [],
       createdAt: now,
       lastModifiedAt: now,
-      lastModifiedBy
+      lastModifiedBy,
+      sortOrder: roomItems.length
     };
 
     try {
@@ -275,10 +297,35 @@ export class TableStorageService {
       console.error("Failed to delete inventory item:", error);
       throw error;
     }
+
+    async updateInventoryItemOrder(items: InventoryItem[], lastModifiedBy: string): Promise<InventoryItem[]> {
+      if (!this.inventoryClient) throw new Error("Table storage not initialized");
+
+      const now = new Date().toISOString();
+      const orderedItems = items.map((item, sortOrder) => ({
+        ...item,
+        sortOrder,
+        lastModifiedAt: now,
+        lastModifiedBy
+      }));
+
+      await Promise.all(
+        orderedItems.map((item) => this.inventoryClient!.upsertEntity(this.toInventoryItemEntity(item), "Replace"))
+      );
+      return orderedItems;
+    }
   }
 
   private generateId(): string {
     return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+  }
+
+  private sortByOrder<T extends { createdAt: string; sortOrder?: number }>(entities: T[]): T[] {
+    return [...entities].sort((left, right) => {
+      const leftOrder = left.sortOrder ?? Number.MAX_SAFE_INTEGER;
+      const rightOrder = right.sortOrder ?? Number.MAX_SAFE_INTEGER;
+      return leftOrder - rightOrder || left.createdAt.localeCompare(right.createdAt);
+    });
   }
 
   private toRoomEntity(room: Room): TableEntity<Room> {
