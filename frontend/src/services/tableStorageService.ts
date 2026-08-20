@@ -140,7 +140,7 @@ export class TableStorageService {
     };
 
     try {
-      await this.roomsClient.updateEntity(this.toRoomEntity(updatedRoom));
+      await this.roomsClient.upsertEntity(this.toRoomEntity(updatedRoom), "Replace");
       return updatedRoom;
     } catch (error) {
       console.error("Failed to update room:", error);
@@ -258,7 +258,7 @@ export class TableStorageService {
     };
 
     try {
-      await this.inventoryClient.updateEntity(this.toInventoryItemEntity(updatedItem));
+      await this.inventoryClient.upsertEntity(this.toInventoryItemEntity(updatedItem), "Replace");
       return updatedItem;
     } catch (error) {
       console.error("Failed to update inventory item:", error);
