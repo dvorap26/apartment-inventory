@@ -197,7 +197,7 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
   }, [language]);
 
   const t = (key: TranslationKey, values?: Record<string, string | number>) =>
-    Object.entries(values ?? {}).reduce(
+    Object.entries(values ?? {}).reduce<string>(
       (text, [name, value]) => text.replace(`{${name}}`, String(value)),
       translations[language][key]
     );
