@@ -22,6 +22,11 @@ export interface InventoryItem {
   lastModifiedBy: string;
 }
 
+type StoredInventoryItem = Omit<InventoryItem, "pictureIds" | "attachmentIds"> & {
+  pictureIds: string;
+  attachmentIds: string;
+};
+
 export class TableStorageService {
   private roomsClient: TableClient | null = null;
   private inventoryClient: TableClient | null = null;
@@ -165,7 +170,7 @@ export class TableStorageService {
     
     try {
       const items: InventoryItem[] = [];
-      for await (const entity of this.inventoryClient.listEntities<InventoryItem>()) {
+      for await (const entity of this.inventoryClient.listEntities<StoredInventoryItem>()) {
         items.push(this.mapInventoryItemEntity(entity));
       }
       return items;
@@ -184,7 +189,7 @@ export class TableStorageService {
     if (!this.inventoryClient) throw new Error("Table storage not initialized");
     
     try {
-      const item = await this.inventoryClient.getEntity<InventoryItem>(itemId, itemId);
+      const item = await this.inventoryClient.getEntity<StoredInventoryItem>(itemId, itemId);
       return this.mapInventoryItemEntity(item);
     } catch (error) {
       if ((error as any).code === "ResourceNotFound") {
@@ -289,19 +294,47 @@ export class TableStorageService {
     return room;
   }
 
-  private toInventoryItemEntity(item: InventoryItem): TableEntity<InventoryItem> {
+  private toInventoryItemEntity(item: InventoryItem): TableEntity<StoredInventoryItem> {
     return {
       ...item,
+      description: item.description ?? "",
+      pictureIds: JSON.stringify(item.pictureIds),
+      attachmentIds: JSON.stringify(item.attachmentIds),
       partitionKey: item.itemId,
       rowKey: item.itemId
     };
   }
 
   private mapInventoryItemEntity(
-    entity: InventoryItem & { partitionKey?: string; rowKey?: string }
+    entity: StoredInventoryItem & { partitionKey?: string; rowKey?: string }
   ): InventoryItem {
-    const { partitionKey: _partitionKey, rowKey: _rowKey, ...item } = entity;
-    return item;
+    const {
+      partitionKey: _partitionKey,
+      rowKey: _rowKey,
+      pictureIds,
+      attachmentIds,
+      ...item
+    } = entity;
+    return {
+      ...item,
+      pictureIds: this.parseStringArray(pictureIds),
+      attachmentIds: this.parseStringArray(attachmentIds)
+    };
+  }
+
+  private parseStringArray(value: string | undefined): string[] {
+    if (!value) {
+      return [];
+    }
+
+    try {
+      const parsed: unknown = JSON.parse(value);
+      return Array.isArray(parsed) && parsed.every((entry) => typeof entry === "string")
+        ? parsed
+        : [];
+    } catch {
+      return [];
+    }
   }
 }
 
