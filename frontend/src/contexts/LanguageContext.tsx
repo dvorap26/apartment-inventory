@@ -199,7 +199,7 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
   const t = (key: TranslationKey, values?: Record<string, string | number>) =>
     Object.entries(values ?? {}).reduce(
       (text, [name, value]) => text.replace(`{${name}}`, String(value)),
-      translations[language][key]
+      translations[language][key] as string
     );
 
   return (
