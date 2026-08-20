@@ -102,6 +102,20 @@ export class BlobStorageService {
     return blockBlobClient.url;
   }
 
+  async getPicturePreviewUrl(blobName: string): Promise<string> {
+    if (!this.blobServiceClient) throw new Error("Blob storage not initialized");
+
+    const containerClient = this.blobServiceClient.getContainerClient("inventory-pictures");
+    const response = await containerClient.getBlockBlobClient(blobName).download();
+    const blob = await response.blobBody;
+
+    if (!blob) {
+      throw new Error("Picture download did not return a body");
+    }
+
+    return URL.createObjectURL(blob);
+  }
+
   async getAttachmentUrl(blobName: string): Promise<string> {
     if (!this.blobServiceClient) throw new Error("Blob storage not initialized");
 

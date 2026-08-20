@@ -43,14 +43,21 @@ export const InventoryItemDetailPanel = ({
     }
 
     let active = true;
-    void blobService.getPictureUrl(pictureId).then((url) => {
+    let objectUrl: string | null = null;
+    void blobService.getPicturePreviewUrl(pictureId).then((url) => {
+      objectUrl = url;
       if (active) {
         setPictureUrl(url);
+      } else {
+        URL.revokeObjectURL(url);
       }
     });
 
     return () => {
       active = false;
+      if (objectUrl) {
+        URL.revokeObjectURL(objectUrl);
+      }
     };
   }, [blobService, item?.pictureIds, pictureIndex]);
 
@@ -199,8 +206,9 @@ export const InventoryItemDetailPanel = ({
   const handleDownloadPicture = async (pictureId: string) => {
     if (!blobService) return;
     try {
-      const url = await blobService.getPictureUrl(pictureId);
+      const url = await blobService.getPicturePreviewUrl(pictureId);
       window.open(url, '_blank');
+      window.setTimeout(() => URL.revokeObjectURL(url), 60_000);
     } catch (error) {
       message.error('Failed to download picture');
     }
@@ -316,6 +324,8 @@ export const InventoryItemDetailPanel = ({
                 <Upload
                   beforeUpload={handleUploadPicture}
                   maxCount={1}
+                  accept="image/*"
+                  capture="environment"
                   style={{ marginTop: '8px' }}
                 >
                   <Button loading={uploadingPicture}>{t('uploadPicture')}</Button>
