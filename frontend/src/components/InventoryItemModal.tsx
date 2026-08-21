@@ -9,7 +9,6 @@ interface InventoryItemModalProps {
   roomId: string | null;
   rooms: Room[];
   onClose: () => void;
-  onSuccess: () => void;
 }
 
 export const InventoryItemModal = ({
@@ -17,7 +16,6 @@ export const InventoryItemModal = ({
   roomId,
   rooms,
   onClose,
-  onSuccess,
 }: InventoryItemModalProps) => {
   const { createInventoryItem } = useStorage();
   const [form] = Form.useForm();
@@ -38,7 +36,6 @@ export const InventoryItemModal = ({
       );
       message.success(t('itemCreated'));
       form.resetFields();
-      onSuccess();
       onClose();
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Operation failed';

@@ -11,7 +11,6 @@ interface InventoryItemDetailPanelProps {
   item: InventoryItem | null;
   rooms: Room[];
   onClose: () => void;
-  onSuccess: () => void;
 }
 
 export const InventoryItemDetailPanel = ({
@@ -19,7 +18,6 @@ export const InventoryItemDetailPanel = ({
   item,
   rooms,
   onClose,
-  onSuccess,
 }: InventoryItemDetailPanelProps) => {
   const { updateInventoryItem, deleteInventoryItem, blobService } = useStorage();
   const [isEditing, setIsEditing] = useState(false);
@@ -34,6 +32,15 @@ export const InventoryItemDetailPanel = ({
   useEffect(() => {
     setPictureIndex(0);
   }, [item?.itemId]);
+
+  useEffect(() => {
+    form.setFieldsValue({
+      itemName: item?.itemName,
+      description: item?.description,
+      roomId: item?.roomId,
+    });
+    setIsEditing(false);
+  }, [form, item]);
 
   useEffect(() => {
     const pictureId = item?.pictureIds[pictureIndex];
@@ -76,7 +83,6 @@ export const InventoryItemDetailPanel = ({
       );
       message.success(t('itemUpdated'));
       setIsEditing(false);
-      onSuccess();
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to update item';
       message.error(errorMessage);
@@ -91,7 +97,6 @@ export const InventoryItemDetailPanel = ({
       setLoading(true);
       await deleteInventoryItem(item.itemId);
       message.success(t('itemDeleted'));
-      onSuccess();
       onClose();
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to delete item';
@@ -119,7 +124,6 @@ export const InventoryItemDetailPanel = ({
         item.attachmentIds
       );
       message.success('Picture uploaded successfully');
-      onSuccess();
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to upload picture';
       message.error(errorMessage);
@@ -143,7 +147,6 @@ export const InventoryItemDetailPanel = ({
         item.attachmentIds
       );
       message.success('Picture deleted successfully');
-      onSuccess();
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to delete picture';
       message.error(errorMessage);
@@ -168,7 +171,6 @@ export const InventoryItemDetailPanel = ({
         updatedAttachmentIds
       );
       message.success('Attachment uploaded successfully');
-      onSuccess();
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to upload attachment';
       message.error(errorMessage);
@@ -192,7 +194,6 @@ export const InventoryItemDetailPanel = ({
         updatedAttachmentIds
       );
       message.success('Attachment deleted successfully');
-      onSuccess();
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to delete attachment';
       message.error(errorMessage);
@@ -236,11 +237,6 @@ export const InventoryItemDetailPanel = ({
         <Form
           form={form}
           layout="vertical"
-          initialValues={{
-            itemName: item.itemName,
-            description: item.description,
-            roomId: item.roomId,
-          }}
         >
           <div style={{ marginBottom: '24px' }}>
             <label style={{ fontWeight: 'bold' }}>{t('itemId')}</label>
