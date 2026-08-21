@@ -86,6 +86,7 @@ const translations = {
     noPictures: 'No pictures yet',
     noAttachments: 'No attachments yet',
     uploadPicture: 'Upload Picture',
+    takePicture: 'Take Picture',
     uploadPdf: 'Upload PDF',
     exportPdf: 'Export to PDF',
     generatingPdf: 'Generating PDF',

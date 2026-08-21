@@ -321,10 +321,18 @@ export const InventoryItemDetailPanel = ({
                   beforeUpload={handleUploadPicture}
                   maxCount={1}
                   accept="image/*"
-                  capture="environment"
                   style={{ marginTop: '8px' }}
                 >
                   <Button loading={uploadingPicture}>{t('uploadPicture')}</Button>
+                </Upload>
+                <Upload
+                  beforeUpload={handleUploadPicture}
+                  maxCount={1}
+                  accept="image/*"
+                  capture="environment"
+                  style={{ marginTop: '8px', marginLeft: '8px' }}
+                >
+                  <Button loading={uploadingPicture}>{t('takePicture')}</Button>
                 </Upload>
               </div>
 
