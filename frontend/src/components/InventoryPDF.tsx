@@ -70,8 +70,9 @@ const styles = StyleSheet.create({
     pageBreakInside: 'avoid',
   },
   picture: {
-    width: 200,
-    height: 150,
+    width: '100%',
+    maxHeight: 650,
+    objectFit: 'contain',
     marginBottom: 5,
   },
   pictureName: {
