@@ -1,4 +1,5 @@
 import { Table, Button, Space, Collapse, Empty, Alert, Tooltip } from 'antd';
+import type { Breakpoint } from 'antd';
 import { PlusOutlined, EditOutlined, UpOutlined, DownOutlined, EyeOutlined } from '@ant-design/icons';
 import type { Room, InventoryItem } from '../services/tableStorageService';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -51,7 +52,7 @@ export const InventoryTable = ({
         key: 'description',
         width: '40%',
         ellipsis: true,
-        responsive: ['sm'],
+        responsive: ['sm'] as Breakpoint[],
       },
       {
         title: t('actions'),

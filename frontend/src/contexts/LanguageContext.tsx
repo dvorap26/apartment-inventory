@@ -176,6 +176,7 @@ const translations = {
     noPictures: 'Zatím nejsou uloženy žádne fotografie',
     noAttachments: 'Zatím nejsou uloženy žádne přílohy',
     uploadPicture: 'Nahrát fotografii',
+    takePicture: 'Vyfotit',
     uploadPdf: 'Nahrát PDF',
     exportPdf: 'Exportovat do PDF',
     generatingPdf: 'Vytvářím PDF',
