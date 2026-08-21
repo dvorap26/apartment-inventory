@@ -106,15 +106,17 @@ export const InventoryItemDetailPanel = ({
     }
   };
 
-  const handleUploadPicture = async (file: RcFile) => {
+  const handleUploadPictures = async (files: RcFile[]) => {
     if (!item || !blobService) {
       message.error('Service not initialized');
-      return false;
+      return;
     }
     try {
       setUploadingPicture(true);
-      const blobName = await blobService.uploadPicture(item.itemId, new File([file], file.name));
-      const updatedPictureIds = [...item.pictureIds, blobName];
+      const uploadedPictureIds = await Promise.all(
+        files.map((file) => blobService.uploadPicture(item.itemId, new File([file], file.name)))
+      );
+      const updatedPictureIds = [...item.pictureIds, ...uploadedPictureIds];
       await updateInventoryItem(
         item.itemId,
         item.itemName,
@@ -130,7 +132,6 @@ export const InventoryItemDetailPanel = ({
     } finally {
       setUploadingPicture(false);
     }
-    return false;
   };
 
   const handleDeletePicture = async (pictureId: string) => {
@@ -318,15 +319,23 @@ export const InventoryItemDetailPanel = ({
                   <p style={{ color: '#999' }}>{t('noPictures')}</p>
                 )}
                 <Upload
-                  beforeUpload={handleUploadPicture}
-                  maxCount={1}
+                  beforeUpload={(file, fileList) => {
+                    if (file === fileList[0]) {
+                      void handleUploadPictures(fileList as RcFile[]);
+                    }
+                    return false;
+                  }}
+                  multiple
                   accept="image/*"
                   style={{ marginTop: '8px' }}
                 >
                   <Button loading={uploadingPicture}>{t('uploadPicture')}</Button>
                 </Upload>
                 <Upload
-                  beforeUpload={handleUploadPicture}
+                  beforeUpload={(file) => {
+                    void handleUploadPictures([file]);
+                    return false;
+                  }}
                   maxCount={1}
                   accept="image/*"
                   capture="environment"
