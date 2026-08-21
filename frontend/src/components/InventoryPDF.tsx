@@ -2,17 +2,25 @@ import { Document, Page, Text, View, StyleSheet, Image, Font } from '@react-pdf/
 import type { Room, InventoryItem } from '../services/tableStorageService';
 import type { Language } from '../contexts/LanguageContext';
 
-// Register font for better PDF rendering
 Font.register({
-  family: 'Helvetica',
-  src: 'https://fonts.googleapis.com/css2?family=Roboto:wght@400;700',
+  family: 'Roboto',
+  fonts: [
+    {
+      src: 'https://fonts.gstatic.com/s/roboto/v51/KFOMCnqEu92Fr1ME7kSn66aGLdTylUAMQXC89YmC2DPNWubEbWmT.ttf',
+      fontWeight: 400,
+    },
+    {
+      src: 'https://fonts.gstatic.com/s/roboto/v51/KFOMCnqEu92Fr1ME7kSn66aGLdTylUAMQXC89YmC2DPNWuYjammT.ttf',
+      fontWeight: 700,
+    },
+  ],
 });
 
 const styles = StyleSheet.create({
   page: {
     padding: 40,
     fontSize: 11,
-    fontFamily: 'Helvetica',
+    fontFamily: 'Roboto',
   },
   title: {
     fontSize: 24,
@@ -92,7 +100,7 @@ interface InventoryPDFProps {
 
 export const InventoryPDF = ({ rooms, inventoryItems, pictureUrls = {}, language }: InventoryPDFProps) => {
   const labels = language === 'cs'
-    ? { title: 'Inventar bytu', pictures: 'Fotografie', noItems: 'V teto mistnosti nejsou zadne polozky', generated: 'Vygenerovano' }
+    ? { title: 'Inventář bytu', pictures: 'Fotografie', noItems: 'V této místnosti nejsou žádné položky', generated: 'Vygenerováno' }
     : { title: 'Apartment Inventory', pictures: 'Pictures', noItems: 'No items in this room', generated: 'Generated on' };
   return (
     <Document>

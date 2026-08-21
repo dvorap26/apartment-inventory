@@ -198,9 +198,6 @@ export const Dashboard = () => {
           roomId={selectedRoomIdForItem}
           rooms={rooms}
           onClose={handleItemModalClose}
-          onSuccess={() => {
-            loadInventoryItems();
-          }}
         />
 
         <InventoryItemDetailPanel
@@ -208,10 +205,6 @@ export const Dashboard = () => {
           item={selectedItem}
           rooms={rooms}
           onClose={handleItemDetailClose}
-          onSuccess={() => {
-            loadRooms();
-            loadInventoryItems();
-          }}
         />
       </Layout.Content>
     </Layout>
