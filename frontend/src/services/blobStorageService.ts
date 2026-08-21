@@ -42,8 +42,9 @@ export class BlobStorageService {
   async uploadAttachment(itemId: string, file: File): Promise<string> {
     if (!this.blobServiceClient) throw new Error("Blob storage not initialized");
 
-    // Only allow PDF files
-    if (file.type !== "application/pdf") {
+    const isPdfMimeType = file.type === "application/pdf" || file.type === "";
+    const hasPdfExtension = file.name.toLowerCase().endsWith(".pdf");
+    if (!isPdfMimeType || !hasPdfExtension) {
       throw new Error("Only PDF files are allowed");
     }
 
@@ -54,7 +55,9 @@ export class BlobStorageService {
       const containerClient = this.blobServiceClient.getContainerClient(containerName);
       const blockBlobClient = containerClient.getBlockBlobClient(blobName);
 
-      await blockBlobClient.upload(file, file.size);
+      await blockBlobClient.upload(file, file.size, {
+        blobHTTPHeaders: { blobContentType: "application/pdf" }
+      });
       return blobName;
     } catch (error) {
       console.error("Failed to upload attachment:", error);
