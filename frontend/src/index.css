@@ -136,7 +136,8 @@ body {
 
   .logout-button,
   .dashboard-actions .ant-btn,
-  .export-button {
+  .export-button,
+  .item-detail-button {
     padding-inline: 8px;
   }
 

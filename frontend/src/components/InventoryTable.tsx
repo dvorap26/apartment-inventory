@@ -1,5 +1,5 @@
 import { Table, Button, Space, Collapse, Empty, Alert, Tooltip } from 'antd';
-import { PlusOutlined, EditOutlined, UpOutlined, DownOutlined } from '@ant-design/icons';
+import { PlusOutlined, EditOutlined, UpOutlined, DownOutlined, EyeOutlined } from '@ant-design/icons';
 import type { Room, InventoryItem } from '../services/tableStorageService';
 import { useLanguage } from '../contexts/LanguageContext';
 
@@ -51,6 +51,7 @@ export const InventoryTable = ({
         key: 'description',
         width: '40%',
         ellipsis: true,
+        responsive: ['sm'],
       },
       {
         title: t('actions'),
@@ -85,11 +86,14 @@ export const InventoryTable = ({
               />
             </Tooltip>
             <Button
+              aria-label={t('view')}
+              className="item-detail-button"
               type="primary"
               size="small"
+              icon={<EyeOutlined />}
               onClick={() => onSelectItem(record)}
             >
-              {t('view')}
+              <span className="button-label">{t('view')}</span>
             </Button>
           </Space>
         ),
